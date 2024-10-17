@@ -1,0 +1,47 @@
+<!-- options.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Настройки расширения</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+            padding: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #4285F4;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3073E0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Настройки</h1>
+    <label for="apiKey">OpenAI API ключ:</label>
+    <input type="password" id="apiKey" placeholder="Введите ваш OpenAI API ключ">
+    <button id="saveButton">Сохранить</button>
+
+    <script src="options.js"></script>
+</body>
+
+</html>
