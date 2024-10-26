@@ -159,6 +159,8 @@ marked.setOptions({
             promptSelector.id = 'promptSelector';
             promptSelector.addEventListener('change', function() {
                 promptType = this.value;
+                // Сохраняем выбранный промпт в хранилище
+                chrome.storage.sync.set({ lastSelectedPrompt: promptType });
                 const resultText = document.getElementById('resultText');
                 if (resultText) resultText.innerText = '';
                 cancelCurrentRequest(); // Отмена текущего запроса при смене промпта
@@ -209,6 +211,15 @@ marked.setOptions({
             // Добавляем окно на страницу
             document.body.appendChild(resultWindow);
 
+            // Центрируем окно
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const windowWidth = resultWindow.offsetWidth;
+            const windowHeight = resultWindow.offsetHeight;
+
+            resultWindow.style.left = (viewportWidth / 2 - windowWidth / 2) + 'px';
+            resultWindow.style.top = (viewportHeight / 2 - windowHeight / 2) + 'px';
+
             // Реализуем возможность перетаскивания окна
             let isDragging = false;
             let offsetX = 0;
@@ -216,8 +227,8 @@ marked.setOptions({
 
             header.addEventListener('mousedown', function(e) {
                 isDragging = true;
-                offsetX = e.clientX - resultWindow.offsetLeft;
-                offsetY = e.clientY - resultWindow.offsetTop;
+                offsetX = e.clientX - parseInt(resultWindow.style.left);
+                offsetY = e.clientY - parseInt(resultWindow.style.top);
                 resultWindow.classList.add('dragging');
             });
 
@@ -225,7 +236,6 @@ marked.setOptions({
                 if (isDragging) {
                     resultWindow.style.left = (e.clientX - offsetX) + 'px';
                     resultWindow.style.top = (e.clientY - offsetY) + 'px';
-                    resultWindow.style.transform = 'translate(0, 0)';
                 }
             });
 
@@ -243,19 +253,35 @@ marked.setOptions({
 
     // Функция для загрузки промптов
     function loadPrompts(promptSelector) {
-        return fetch(chrome.runtime.getURL('prompts.json'))
-            .then(response => response.json())
-            .then(data => {
-                promptSelector.innerHTML = '';
-                data.prompts.forEach(prompt => {
-                    let option = document.createElement('option');
-                    option.value = prompt.name;
-                    option.innerText = prompt.name;
-                    promptSelector.appendChild(option);
+        return new Promise((resolve, reject) => {
+            fetch(chrome.runtime.getURL('prompts.json'))
+                .then(response => response.json())
+                .then(data => {
+                    promptSelector.innerHTML = '';
+                    data.prompts.forEach(prompt => {
+                        let option = document.createElement('option');
+                        option.value = prompt.name;
+                        option.innerText = prompt.name;
+                        promptSelector.appendChild(option);
+                    });
+                    // После добавления опций загружаем сохраненный промпт
+                    chrome.storage.sync.get(['lastSelectedPrompt'], function(result) {
+                        const storedValue = result.lastSelectedPrompt;
+                        const optionValues = Array.from(promptSelector.options).map(option => option.value);
+                        if (storedValue && optionValues.includes(storedValue)) {
+                            promptSelector.value = storedValue;
+                        } else {
+                            promptSelector.value = optionValues[0];
+                        }
+                        promptType = promptSelector.value;
+                        resolve(); // Разрешаем Promise после завершения
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке промптов:', error);
+                    reject(error);
                 });
-                promptType = promptSelector.value;
-            })
-            .catch(error => console.error('Ошибка при загрузке промптов:', error));
+        });
     }
 
     // Функция для отмены текущего запроса
