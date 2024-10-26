@@ -1,12 +1,15 @@
 // content.js
 
-import { marked } from 'marked';
-import hljs from 'highlight.js/lib/core';
-import swift from 'highlight.js/lib/languages/swift';
-import 'highlight.js/styles/github.css';
+// Импортируем необходимые библиотеки
+import { marked } from 'marked'; // Библиотека для парсинга Markdown
+import hljs from 'highlight.js/lib/core'; // Библиотека для подсветки синтаксиса
+import swift from 'highlight.js/lib/languages/swift'; // Язык Swift для подсветки
+import 'highlight.js/styles/github.css'; // Стили для подсветки кода
 
+// Регистрируем язык Swift для подсветки кода
 hljs.registerLanguage('swift', swift);
 
+// Настраиваем marked для использования подсветки синтаксиса
 marked.setOptions({
     highlight: function (code, lang) {
         if (lang && hljs.getLanguage(lang)) {
@@ -19,18 +22,21 @@ marked.setOptions({
 (function() {
     'use strict';
 
+    // Создаем и настраиваем иконку "улучшения"
     let improveIcon = document.createElement('div');
     improveIcon.id = 'improveIcon';
     improveIcon.innerHTML = '<i class="fas fa-magic"></i>';
     improveIcon.style.display = 'none';
     document.body.appendChild(improveIcon);
 
+    // Переменные для хранения состояния
     let selectedText = '';
     let initialSelectedText = '';
     let promptType = '';
     let markdownBuffer = '';
     let currentRequestId = null;
 
+    // Обработчик события при выделении текста
     document.addEventListener('mouseup', function(e) {
         setTimeout(() => {
             let currentSelection = window.getSelection().toString().trim();
@@ -45,15 +51,22 @@ marked.setOptions({
         }, 10);
     });
 
+    // Обработчик клика по иконке "улучшения"
     improveIcon.addEventListener('click', function() {
         if (selectedText.length > 0) {
             initialSelectedText = selectedText;
-            showResult('');
-            sendRequest(initialSelectedText);
+
+            // Вызов showResult и ожидание, пока она завершит свою работу
+            showResult('').then(() => {
+                // Гарантированно вызываем sendRequest после завершения showResult
+                console.log('Отправка запроса:', initialSelectedText);
+                sendRequest(initialSelectedText);
+            });
         }
         improveIcon.style.display = 'none';
     });
 
+    // Получаем идентификатор текущей вкладки
     chrome.runtime.sendMessage({ action: 'getTabId' }, function(response) {
         if (response && response.tabId !== undefined) {
             window.currentTabId = response.tabId;
@@ -62,6 +75,7 @@ marked.setOptions({
         }
     });
 
+    // Функция для отправки запроса к background script
     function sendRequest(text) {
         const resultText = document.getElementById('resultText');
         const resultWindow = document.getElementById('resultWindow');
@@ -77,6 +91,7 @@ marked.setOptions({
         // Очищаем markdown буфер
         markdownBuffer = '';
 
+        // Отправляем сообщение в background script
         chrome.runtime.sendMessage({
             action: 'sendToOpenAI',
             text: text,
@@ -93,124 +108,142 @@ marked.setOptions({
         });
     }
 
+    // Слушаем сообщения от background script
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.requestId !== currentRequestId) {
             // Если идентификатор запроса не совпадает, игнорируем сообщение
             return;
         }
         if (request.action === 'streamData') {
+            // Получаем потоковые данные и добавляем их к результату
             appendResultText(request.content);
         }
     });
 
+    // Функция для добавления текста к результату
     function appendResultText(text) {
         const resultText = document.getElementById('resultText');
         if (resultText) {
             markdownBuffer += text;
             resultText.innerHTML = marked(markdownBuffer);
 
+            // Подсвечиваем синтаксис в блоках кода
             resultText.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
-
-            resultText.scrollTop = resultText.scrollHeight;
         }
     }
 
+    // Функция для отображения окна результата
     function showResult(text) {
-        let resultWindow = document.createElement('div');
-        resultWindow.id = 'resultWindow';
+        return new Promise((resolve) => {
+            let resultWindow = document.createElement('div');
+            resultWindow.id = 'resultWindow';
 
-        let header = document.createElement('header');
-        let title = document.createElement('h2');
-        title.innerText = 'Результат';
-        let closeButton = document.createElement('button');
-        closeButton.id = 'closeButton';
-        closeButton.innerHTML = '&times;';
-        closeButton.addEventListener('click', function() {
-            document.body.removeChild(resultWindow);
-            cancelCurrentRequest(); // Отмена текущего запроса при закрытии окна
-        });
-        header.appendChild(title);
-        header.appendChild(closeButton);
+            // Создаем заголовок окна
+            let header = document.createElement('header');
+            let title = document.createElement('h2');
+            title.innerText = 'Результат';
+            let closeButton = document.createElement('button');
+            closeButton.id = 'closeButton';
+            closeButton.innerHTML = '&times;';
+            closeButton.addEventListener('click', function() {
+                document.body.removeChild(resultWindow);
+                cancelCurrentRequest(); // Отмена текущего запроса при закрытии окна
+            });
+            header.appendChild(title);
+            header.appendChild(closeButton);
 
-        let promptSelector = document.createElement('select');
-        promptSelector.id = 'promptSelector';
-        promptSelector.addEventListener('change', function() {
-            promptType = this.value;
-            const resultText = document.getElementById('resultText');
-            if (resultText) resultText.innerText = '';
-            cancelCurrentRequest(); // Отмена текущего запроса при смене промпта
-            sendRequest(initialSelectedText);
-        });
+            // Создаем выпадающий список для выбора промпта
+            let promptSelector = document.createElement('select');
+            promptSelector.id = 'promptSelector';
+            promptSelector.addEventListener('change', function() {
+                promptType = this.value;
+                const resultText = document.getElementById('resultText');
+                if (resultText) resultText.innerText = '';
+                cancelCurrentRequest(); // Отмена текущего запроса при смене промпта
+                sendRequest(initialSelectedText);
+            });
 
-        let resultText = document.createElement('div');
-        resultText.id = 'resultText';
-        resultText.innerHTML = marked(text);
+            // Создаем область для отображения результата
+            let resultText = document.createElement('div');
+            resultText.id = 'resultText';
+            resultText.innerHTML = marked(text);
 
-        let buttonsDiv = document.createElement('div');
-        buttonsDiv.id = 'buttons';
+            // Создаем контейнер для кнопок
+            let buttonsDiv = document.createElement('div');
+            buttonsDiv.id = 'buttons';
 
-        let copyButton = document.createElement('button');
-        copyButton.id = 'copyButton';
-        copyButton.innerText = 'Копировать';
-        copyButton.addEventListener('click', function() {
-            navigator.clipboard.writeText(resultText.innerText).then(() => {
-                copyButton.innerText = 'Скопировано!';
-                setTimeout(() => {
-                    copyButton.innerText = 'Копировать';
-                }, 2000);
+            // Кнопка "Копировать"
+            let copyButton = document.createElement('button');
+            copyButton.id = 'copyButton';
+            copyButton.innerText = 'Копировать';
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(resultText.innerText).then(() => {
+                    copyButton.innerText = 'Скопировано!';
+                    setTimeout(() => {
+                        copyButton.innerText = 'Копировать';
+                    }, 2000);
+                });
+            });
+
+            // Кнопка "Отправить заново"
+            let resendButton = document.createElement('button');
+            resendButton.id = 'resendButton';
+            resendButton.innerText = 'Отправить заново';
+            resendButton.addEventListener('click', function() {
+                cancelCurrentRequest(); // Отмена текущего запроса
+                sendRequest(initialSelectedText); // Отправка нового запроса с теми же параметрами
+            });
+
+            // Добавляем кнопки в контейнер
+            buttonsDiv.appendChild(copyButton);
+            buttonsDiv.appendChild(resendButton);
+
+            // Собираем все элементы окна
+            resultWindow.appendChild(header);
+            resultWindow.appendChild(promptSelector);
+            resultWindow.appendChild(resultText);
+            resultWindow.appendChild(buttonsDiv);
+
+            // Добавляем окно на страницу
+            document.body.appendChild(resultWindow);
+
+            // Реализуем возможность перетаскивания окна
+            let isDragging = false;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            header.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                offsetX = e.clientX - resultWindow.offsetLeft;
+                offsetY = e.clientY - resultWindow.offsetTop;
+                resultWindow.classList.add('dragging');
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    resultWindow.style.left = (e.clientX - offsetX) + 'px';
+                    resultWindow.style.top = (e.clientY - offsetY) + 'px';
+                    resultWindow.style.transform = 'translate(0, 0)';
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                resultWindow.classList.remove('dragging');
+            });
+
+            // Загружаем список промптов и разрешаем Promise после завершения
+            loadPrompts(promptSelector).then(() => {
+                resolve(); // Разрешаем Promise после завершения loadPrompts
             });
         });
-
-        // **Новая кнопка "Сбросить и отправить заново"**
-        let resendButton = document.createElement('button');
-        resendButton.id = 'resendButton';
-        resendButton.innerText = 'Отправить заново';
-        resendButton.addEventListener('click', function() {
-            cancelCurrentRequest(); // Отмена текущего запроса
-            sendRequest(initialSelectedText); // Отправка нового запроса с теми же параметрами
-        });
-
-        buttonsDiv.appendChild(copyButton);
-        buttonsDiv.appendChild(resendButton); // Добавляем новую кнопку в контейнер кнопок
-
-        resultWindow.appendChild(header);
-        resultWindow.appendChild(promptSelector);
-        resultWindow.appendChild(resultText);
-        resultWindow.appendChild(buttonsDiv);
-
-        document.body.appendChild(resultWindow);
-
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        header.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            offsetX = e.clientX - resultWindow.offsetLeft;
-            offsetY = e.clientY - resultWindow.offsetTop;
-            resultWindow.classList.add('dragging');
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (isDragging) {
-                resultWindow.style.left = (e.clientX - offsetX) + 'px';
-                resultWindow.style.top = (e.clientY - offsetY) + 'px';
-                resultWindow.style.transform = 'translate(0, 0)';
-            }
-        });
-
-        document.addEventListener('mouseup', function() {
-            isDragging = false;
-            resultWindow.classList.remove('dragging');
-        });
-
-        loadPrompts(promptSelector);
     }
 
+    // Функция для загрузки промптов
     function loadPrompts(promptSelector) {
-        fetch(chrome.runtime.getURL('prompts.json'))
+        return fetch(chrome.runtime.getURL('prompts.json'))
             .then(response => response.json())
             .then(data => {
                 promptSelector.innerHTML = '';
@@ -225,6 +258,7 @@ marked.setOptions({
             .catch(error => console.error('Ошибка при загрузке промптов:', error));
     }
 
+    // Функция для отмены текущего запроса
     function cancelCurrentRequest() {
         if (currentRequestId) {
             chrome.runtime.sendMessage({
