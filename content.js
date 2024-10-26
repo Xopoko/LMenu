@@ -1,5 +1,21 @@
 // content.js
 
+import { marked } from 'marked';
+import hljs from 'highlight.js/lib/core';
+import swift from 'highlight.js/lib/languages/swift';
+import 'highlight.js/styles/github.css';
+
+hljs.registerLanguage('swift', swift);
+
+marked.setOptions({
+    highlight: function (code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+        }
+        return hljs.highlightAuto(code).value;
+    }
+});
+
 (function() {
     'use strict';
 
@@ -11,7 +27,9 @@
 
     let selectedText = '';
     let initialSelectedText = '';
-    let promptType = 'Перевод на русский';
+    let promptType = '';
+    let markdownBuffer = '';
+    let currentRequestId = null;
 
     document.addEventListener('mouseup', function(e) {
         setTimeout(() => {
@@ -36,7 +54,6 @@
         improveIcon.style.display = 'none';
     });
 
-    // Получение tabId
     chrome.runtime.sendMessage({ action: 'getTabId' }, function(response) {
         if (response && response.tabId !== undefined) {
             window.currentTabId = response.tabId;
@@ -46,49 +63,57 @@
     });
 
     function sendRequest(text) {
+        const resultText = document.getElementById('resultText');
         const resultWindow = document.getElementById('resultWindow');
-        if (resultWindow) {
-            const loader = document.createElement('div');
-            loader.id = 'loader';
-            loader.innerText = 'Ожидание ответа от API...';
-            resultWindow.appendChild(loader);
+
+        // Генерируем уникальный идентификатор запроса
+        currentRequestId = Date.now() + Math.random();
+
+        // Очистка предыдущего результата
+        if (resultText) {
+            resultText.innerHTML = '';
         }
+
+        // Очищаем markdown буфер
+        markdownBuffer = '';
 
         chrome.runtime.sendMessage({
             action: 'sendToOpenAI',
             text: text,
             promptType: promptType,
-            tabId: window.currentTabId
+            tabId: window.currentTabId,
+            requestId: currentRequestId // Передаем идентификатор запроса
         }, function(response) {
             if (response && response.success) {
-                // Инициализация успешна, обработка будет через сообщения
+                console.log('Запрос успешно отправлен');
             } else {
+                console.error('Ошибка при отправке запроса:', response.error || 'Неизвестная ошибка');
                 alert(response.error || 'Неизвестная ошибка.');
             }
         });
     }
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.requestId !== currentRequestId) {
+            // Если идентификатор запроса не совпадает, игнорируем сообщение
+            return;
+        }
         if (request.action === 'streamData') {
-            console.log('Получены данные от background.js:', request.content);
             appendResultText(request.content);
-        } else if (request.action === 'streamComplete') {
-            console.log('Поток данных завершен.');
-            const loader = document.getElementById('loader');
-            if (loader) loader.remove();
-        } else if (request.action === 'streamError') {
-            console.error('Ошибка при получении данных:', request.error);
-            const loader = document.getElementById('loader');
-            if (loader) loader.innerText = 'Ошибка при получении данных.';
         }
     });
 
     function appendResultText(text) {
         const resultText = document.getElementById('resultText');
         if (resultText) {
-            resultText.innerText += text;
-        } else {
-            console.error('Элемент resultText не найден.');
+            markdownBuffer += text;
+            resultText.innerHTML = marked(markdownBuffer);
+
+            resultText.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
+            resultText.scrollTop = resultText.scrollHeight;
         }
     }
 
@@ -96,7 +121,6 @@
         let resultWindow = document.createElement('div');
         resultWindow.id = 'resultWindow';
 
-        // Заголовок окна
         let header = document.createElement('header');
         let title = document.createElement('h2');
         title.innerText = 'Результат';
@@ -105,32 +129,25 @@
         closeButton.innerHTML = '&times;';
         closeButton.addEventListener('click', function() {
             document.body.removeChild(resultWindow);
+            cancelCurrentRequest(); // Отмена текущего запроса при закрытии окна
         });
         header.appendChild(title);
         header.appendChild(closeButton);
 
-        // Селектор действий
         let promptSelector = document.createElement('select');
         promptSelector.id = 'promptSelector';
-        promptSelector.innerHTML = `
-            <option value="Перевод на русский">Перевод на русский</option>
-            <option value="Исправить орфографические ошибки">Исправить орфографические ошибки</option>
-        `;
-        promptSelector.value = promptType;
         promptSelector.addEventListener('change', function() {
             promptType = this.value;
-            // Очистить предыдущий результат
             const resultText = document.getElementById('resultText');
             if (resultText) resultText.innerText = '';
+            cancelCurrentRequest(); // Отмена текущего запроса при смене промпта
             sendRequest(initialSelectedText);
         });
 
-        // Блок результата
         let resultText = document.createElement('div');
         resultText.id = 'resultText';
-        resultText.innerText = text;
+        resultText.innerHTML = marked(text);
 
-        // Кнопки действия
         let buttonsDiv = document.createElement('div');
         buttonsDiv.id = 'buttons';
 
@@ -146,9 +163,18 @@
             });
         });
 
-        buttonsDiv.appendChild(copyButton);
+        // **Новая кнопка "Сбросить и отправить заново"**
+        let resendButton = document.createElement('button');
+        resendButton.id = 'resendButton';
+        resendButton.innerText = 'Отправить заново';
+        resendButton.addEventListener('click', function() {
+            cancelCurrentRequest(); // Отмена текущего запроса
+            sendRequest(initialSelectedText); // Отправка нового запроса с теми же параметрами
+        });
 
-        // Добавляем элементы в окно
+        buttonsDiv.appendChild(copyButton);
+        buttonsDiv.appendChild(resendButton); // Добавляем новую кнопку в контейнер кнопок
+
         resultWindow.appendChild(header);
         resultWindow.appendChild(promptSelector);
         resultWindow.appendChild(resultText);
@@ -156,7 +182,6 @@
 
         document.body.appendChild(resultWindow);
 
-        // Реализация перетаскивания окна
         let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
@@ -177,11 +202,42 @@
         });
 
         document.addEventListener('mouseup', function() {
-            if (isDragging) {
-                isDragging = false;
-                resultWindow.classList.remove('dragging');
-            }
+            isDragging = false;
+            resultWindow.classList.remove('dragging');
         });
+
+        loadPrompts(promptSelector);
     }
+
+    function loadPrompts(promptSelector) {
+        fetch(chrome.runtime.getURL('prompts.json'))
+            .then(response => response.json())
+            .then(data => {
+                promptSelector.innerHTML = '';
+                data.prompts.forEach(prompt => {
+                    let option = document.createElement('option');
+                    option.value = prompt.name;
+                    option.innerText = prompt.name;
+                    promptSelector.appendChild(option);
+                });
+                promptType = promptSelector.value;
+            })
+            .catch(error => console.error('Ошибка при загрузке промптов:', error));
+    }
+
+    function cancelCurrentRequest() {
+        if (currentRequestId) {
+            chrome.runtime.sendMessage({
+                action: 'cancelRequest',
+                requestId: currentRequestId
+            });
+            currentRequestId = null;
+        }
+    }
+
+    // Инициализация promptType при загрузке скрипта
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPrompts({ appendChild: () => {} }); // Загружаем промпты без добавления в DOM
+    });
 
 })();

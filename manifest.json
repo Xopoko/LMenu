@@ -10,16 +10,24 @@
     "tabs"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "dist/background.bundle.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["dist/content.bundle.js"],
       "css": ["styles.css"]
     }
   ],
-  "options_page": "options.html",
+  "options_page": "dist/options.bundle.js",
+  "web_accessible_resources": [
+    {
+      "resources": ["prompts.json"],
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.bundle.js"],
+      "css": ["styles.css"]
+    }
+  ],
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

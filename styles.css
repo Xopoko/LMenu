@@ -25,12 +25,12 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background: #fff;
-    padding: 20px 30px;
+    padding: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     z-index: 10000;
     color: #333;
     border-radius: 8px;
-    width: 400px;
+    width: 1000px;
     max-width: 90%;
     font-family: Arial, sans-serif;
 }
@@ -72,8 +72,40 @@
     padding: 15px;
     border-radius: 4px;
     min-height: 100px;
+    max-height: 300px;
+    /* Ограничение высоты для прокрутки */
     overflow-y: auto;
+    /* Включаем вертикальную прокрутку */
     border: 1px solid #eee;
+    word-wrap: break-word;
+}
+
+#resultText h1,
+#resultText h2,
+#resultText h3 {
+    color: #4285F4;
+}
+
+#resultText p {
+    margin: 10px 0;
+}
+
+#resultText code {
+    background-color: #f4f4f4;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#resultText pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+#resultText ul {
+    list-style-type: disc;
+    margin-left: 20px;
 }
 
 #buttons {
@@ -87,19 +119,27 @@
     color: #fff;
     border: none;
     padding: 8px 15px;
+    margin: 5px;
     border-radius: 4px;
     cursor: pointer;
-    margin-right: 10px;
 }
 
 #copyButton:hover {
     background: #3073E0;
 }
 
-#loader {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #4285F4;
+#resendButton {
+    background: #4285F4;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#resendButton:hover {
+    background: #3073E0;
 }
 
 /* Перетаскивание окна */
