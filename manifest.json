@@ -16,13 +16,14 @@
     {
       "matches": ["<all_urls>"],
       "js": ["dist/content.bundle.js"],
-      "css": ["styles.css"]
+      "css": ["styles.css"],
+      "run_at": "document_end"
     }
   ],
   "options_page": "dist/options.bundle.js",
   "web_accessible_resources": [
     {
-      "resources": ["prompts.json"],
+      "resources": ["prompts.json", "resultWindow.html", "resultWindow.css"],
       "matches": ["<all_urls>"],
       "js": ["dist/content.bundle.js"],
       "css": ["styles.css"]

@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Обрабатываем запрос на отправку данных в OpenAI API
     } else if (request.action === 'sendToOpenAI') {
-        const { text, promptType, tabId, requestId } = request;
+        const { text, promptType, promptLanguage, tabId, requestId } = request;
 
         // Загружаем JSON с промптами
         fetch(chrome.runtime.getURL('prompts.json'))
@@ -25,8 +25,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     return;
                 }
 
-                // Получаем системный контент для промпта
+                // Получаем системный контент для промпта и заменяем {language}
                 const systemContent = selectedPrompt.systemContent;
+                const processedSystemContent = systemContent.replace(/\{language\}/g, promptLanguage);
 
                 // Получаем API ключ OpenAI из хранилища расширения
                 chrome.storage.sync.get(['openaiApiKey'], function(result) {
@@ -52,10 +53,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             'Authorization': 'Bearer ' + apiKey
                         },
                         body: JSON.stringify({
-                            model: 'gpt-4o',
+                            model: 'gpt-4',
                             stream: true,
                             messages: [
-                                { role: 'system', content: systemContent },
+                                { role: 'system', content: processedSystemContent },
                                 { role: 'user', content: text }
                             ]
                         }),
