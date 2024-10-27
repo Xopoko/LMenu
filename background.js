@@ -53,7 +53,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             'Authorization': 'Bearer ' + apiKey
                         },
                         body: JSON.stringify({
-                            model: 'gpt-4',
+                            model: 'gpt-4o',
                             stream: true,
                             messages: [
                                 { role: 'system', content: processedSystemContent },
