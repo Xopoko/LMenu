@@ -1,25 +1,22 @@
-/* resultWindow.css */
-
+/* Общий стиль окна результата */
 #resultWindow {
     position: fixed;
     background: #fff;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    z-index: 10000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
     color: #333;
-    border-radius: 8px;
+    border-radius: 10px;
     width: 600px;
     max-width: 90%;
-    font-family: Arial, sans-serif;
-
-    /* Центрирование окна */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
 }
 
 #resultWindow.dragging {
-    opacity: 0.8;
+    opacity: 0.85;
     cursor: move;
 }
 
@@ -27,26 +24,31 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #resultWindow h2 {
     margin: 0;
-    font-size: 18px;
-    color: #4285F4;
+    font-size: 20px;
+    color: #333;
 }
 
 #closeButton {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 24px;
     cursor: pointer;
-    color: #999;
+    color: #bbb;
+    transition: color 0.2s;
 }
 
 #closeButton:hover {
     color: #666;
 }
 
+/* Селекторы */
 #selectors {
     display: flex;
     gap: 10px;
@@ -56,26 +58,42 @@
 #promptSelector,
 #promptLanguageSelector {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+}
+
+#promptSelector:focus,
+#promptLanguageSelector:focus {
+    border-color: #007bff;
+}
+
+/* Основное содержимое */
+#resultTextContainer {
+    position: relative;
+    padding: 0;
+    background-color: #fafafa;
+    border-radius: 10px;
+    border: 1px solid #eee;
 }
 
 #resultText {
-    background: #f9f9f9;
     padding: 15px;
-    border-radius: 4px;
-    min-height: 100px;
+    background: #fafafa;
+    border-radius: 8px;
     max-height: 300px;
     overflow-y: auto;
-    border: 1px solid #eee;
     word-wrap: break-word;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 #resultText h1,
 #resultText h2,
 #resultText h3 {
-    color: #4285F4;
+    color: #007bff;
+    margin: 10px 0;
 }
 
 #resultText p {
@@ -84,40 +102,55 @@
 
 #resultText code {
     background-color: #f4f4f4;
-    padding: 5px;
-    border-radius: 5px;
-}
-
-#resultText pre {
-    background-color: #f4f4f4;
-    padding: 10px;
-    border-radius: 5px;
-    overflow-x: auto;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
 }
 
 #resultText ul {
-    list-style-type: disc;
-    margin-left: 20px;
+    padding-left: 20px;
 }
 
-#buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 15px;
-}
-
+/* Кнопки "Копировать" и "Отправить заново" */
 #copyButton,
 #resendButton {
-    background: #4285F4;
-    color: #fff;
+    position: absolute;
+    top: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    /* Полупрозрачный фон */
+    color: #007bff;
     border: none;
-    padding: 8px 15px;
-    margin: 5px;
-    border-radius: 4px;
+    padding: 8px;
+    font-size: 16px;
     cursor: pointer;
+    border-radius: 50%;
+    transition: color 0.3s, transform 0.1s ease-in-out, background-color 0.3s;
+}
+
+#copyButton {
+    right: 20px;
+}
+
+#resendButton {
+    right: 60px;
 }
 
 #copyButton:hover,
 #resendButton:hover {
-    background: #3073E0;
+    color: #0056b3;
+    transform: scale(1.1);
+    background-color: rgba(0, 0, 0, 0.2);
+    /* Увеличение прозрачности при наведении */
+}
+
+#copyButton i,
+#resendButton i {
+    font-size: 20px;
+}
+
+/* Область для кнопок */
+#buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
 }

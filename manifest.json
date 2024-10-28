@@ -20,7 +20,7 @@
       "run_at": "document_end"
     }
   ],
-  "options_page": "dist/options.bundle.js",
+  "options_page": "options.html",
   "web_accessible_resources": [
     {
       "resources": ["prompts.json", "resultWindow.html", "resultWindow.css"],

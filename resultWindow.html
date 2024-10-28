@@ -1,16 +1,73 @@
-<!-- resultWindow.html -->
-<div id="resultWindow">
-    <header>
-        <h2>Результат</h2>
-        <button id="closeButton">&times;</button>
-    </header>
-    <div id="selectors">
-        <select id="promptSelector"></select>
-        <select id="promptLanguageSelector"></select>
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Window</title>
+    <!-- Подключаем CSS файл -->
+    <link rel="stylesheet" href="resultWindow.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="resultWindow">
+        <header>
+            <h2>Результат</h2>
+            <button id="closeButton">&times;</button>
+        </header>
+
+        <!-- Селекторы -->
+        <div id="selectors">
+            <select id="promptSelector"></select>
+            <select id="promptLanguageSelector"></select>
+        </div>
+
+        <!-- Результат -->
+        <div id="resultTextContainer">
+            <div id="resultText"></div>
+                <div id="buttons">
+                    <button id="resendButton" onclick="copyToClipboard()">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                    
+                    <button id="copyButton" onclick="copyToClipboard()">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+        </div>
     </div>
-    <div id="resultText"></div>
-    <div id="buttons">
-        <button id="copyButton">Копировать</button>
-        <button id="resendButton">Отправить заново</button>
-    </div>
-</div>
+
+    <!-- Добавляем тестовые данные только в режиме разработки -->
+    <script>
+        if (window.location.hostname === '127.0.0.1') {  // Проверка на режим разработки
+            document.getElementById('promptSelector').innerHTML = `
+                <option value="1">Тестовый запрос 1</option>
+                <option value="2">Тестовый запрос 2</option>
+                <option value="3">Тестовый запрос 3</option>
+            `;
+            document.getElementById('promptLanguageSelector').innerHTML = `
+                <option value="ru">Русский</option>
+                <option value="en">Английский</option>
+            `;
+            document.getElementById('resultText').innerHTML = `
+                <h3>Пример результата</h3>
+                <p>Это тестовый текст результата для предпросмотра.</p>
+                <p>Вы можете добавить <code>HTML</code> или <strong>другие элементы</strong> для проверки отображения.</p>
+                <ul>
+                    <li>Пункт 1</li>
+                    <li>Пункт 2</li>
+                    <li>Пункт 3</li>
+                    <li>Пункт 4</li>
+                    <li>Пункт 5</li>
+                    <li>Пункт 6</li>
+                    <li>Пункт 7</li>
+                    <li>Пункт 8</li>
+                    <li>Пункт 9</li>
+                </ul>
+            `;
+        }
+    </script>
+</body>
+
+</html>
