@@ -115,16 +115,15 @@
 #copyButton,
 #resendButton {
     position: absolute;
-    top: 10px;
-    background-color: rgba(0, 0, 0, 0.1);
+    bottom: 10px;
     /* Полупрозрачный фон */
-    color: #007bff;
+    background-color: transparent;
+    color: #00000028;
     border: none;
     padding: 8px;
-    font-size: 16px;
     cursor: pointer;
-    border-radius: 50%;
-    transition: color 0.3s, transform 0.1s ease-in-out, background-color 0.3s;
+    transform: scale(0.7);
+    transition: color 0.3s, transform 0.1s ease-in-out;
 }
 
 #copyButton {
@@ -137,9 +136,9 @@
 
 #copyButton:hover,
 #resendButton:hover {
-    color: #0056b3;
-    transform: scale(1.1);
-    background-color: rgba(0, 0, 0, 0.2);
+    color: #0057b32f;
+    transform: scale(0.8);
+    transition: transform 0.25s ease-in-out;
     /* Увеличение прозрачности при наведении */
 }
 
