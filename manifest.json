@@ -3,12 +3,7 @@
   "name": "Улучшение выделенного текста с помощью OpenAI",
   "version": "1.1",
   "description": "Отправляет выделенный текст в OpenAI для улучшения качества",
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage",
-    "tabs"
-  ],
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "background": {
     "service_worker": "dist/background.bundle.js"
   },
@@ -23,10 +18,8 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["prompts.json", "resultWindow.html", "resultWindow.css"],
-      "matches": ["<all_urls>"],
-      "js": ["dist/content.bundle.js"],
-      "css": ["styles.css"]
+      "resources": ["prompts.json", "resultWindow.html", "resultWindow.css", "completionWindow.html"],
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {
