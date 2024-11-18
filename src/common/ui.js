@@ -179,7 +179,7 @@ async function initializeSelectors(promptSelector, promptLanguageSelector) {
         const languages = storedData.languages || [];
 
         if (prompts.length === 0 || languages.length === 0) {
-            // Если данных нет, можно обработать ошибку или установить значения по умолчанию
+            // If no data is found, handle the error or set default values
             console.error('No prompts or languages found in storage.');
             return;
         }

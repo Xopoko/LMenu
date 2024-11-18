@@ -16,10 +16,10 @@ marked.setOptions({
 
 export let chatContext = [];
 let shadowRoot = null;
-let assistantMessageBuffer = ""; // Буфер для накопления сообщения ассистента
+let assistantMessageBuffer = ""; // Buffer for accumulating assistant's message
 
 /**
- * Устанавливает shadow root для манипуляции DOM.
+ * Sets the shadow root for DOM manipulation.
  * @param {ShadowRoot} root - Shadow root.
  */
 export function setShadowRoot(root) {
@@ -27,12 +27,12 @@ export function setShadowRoot(root) {
 }
 
 /**
- * Добавляет полученный текст в окно чата.
- * @param {string} text - Текст для добавления.
- * @param {boolean} isComplete - Указывает, завершено ли сообщение.
+ * Adds the received text to the chat window.
+ * @param {string} text - Text to add.
+ * @param {boolean} isComplete - Indicates whether the message is complete.
  */
 export function appendResultText(text, isComplete = false) {
-  assistantMessageBuffer += text; // Накопление текста
+  assistantMessageBuffer += text; // Accumulate text
 
   const chatMessages = shadowRoot.getElementById("chatMessages");
   let lastMessage = chatMessages.lastElementChild;
@@ -43,20 +43,20 @@ export function appendResultText(text, isComplete = false) {
     chatMessages.appendChild(lastMessage);
   }
 
-  // Парсинг и обновление содержимого сообщения
+  // Parse and update the message content
   lastMessage.innerHTML = marked.parse(assistantMessageBuffer);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  // Когда сообщение завершено, добавляем его в контекст и сбрасываем буфер
+  // When the message is complete, add it to the context and reset the buffer
   if (isComplete) {
     addAssistantMessage(assistantMessageBuffer);
-    assistantMessageBuffer = ""; // Сбрасываем буфер здесь
+    assistantMessageBuffer = ""; // Reset the buffer here
   }
 }
 
 /**
- * Добавляет сообщение пользователя в чат.
- * @param {string} text - Сообщение пользователя.
+ * Adds the user's message to the chat.
+ * @param {string} text - User's message.
  */
 export function addUserMessage(text) {
   const chatMessages = shadowRoot.getElementById("chatMessages");
@@ -70,26 +70,26 @@ export function addUserMessage(text) {
 }
 
 /**
- * Добавляет сообщение ассистента в контекст чата.
- * @param {string} text - Сообщение ассистента.
+ * Adds the assistant's message to the chat context.
+ * @param {string} text - Assistant's message.
  */
 export function addAssistantMessage(text) {
   chatContext.push({ role: "assistant", content: text });
 }
 
 /**
- * Сбрасывает контекст чата.
+ * Resets the chat context.
  */
 export function resetContext() {
   chatContext = [];
   const chatMessages = shadowRoot.getElementById("chatMessages");
   chatMessages.innerHTML = "";
-  assistantMessageBuffer = ""; // Сбрасываем буфер
+  assistantMessageBuffer = ""; // Reset the buffer
 }
 
 /**
- * Получает контекст чата.
- * @returns {Array} - Массив контекста чата.
+ * Gets the chat context.
+ * @returns {Array} - Array of chat context.
  */
 export function getContext() {
   return chatContext;

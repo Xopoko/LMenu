@@ -1,4 +1,4 @@
-/* Общий стиль окна результата */
+/* General style for the result window */
 #resultWindow {
     position: fixed;
     background: #fff;
@@ -34,7 +34,7 @@
     color: #333;
 }
 
-/* Селекторы */
+/* Selectors */
 #selectors {
     display: flex;
     gap: 10px;
@@ -58,7 +58,7 @@
     border-color: #007bff;
 }
 
-/* Контейнер чата */
+/* Chat container */
 #chatContainer {
     flex: 1;
     position: relative;
@@ -93,15 +93,14 @@
     max-width: 80%;
 }
 
-/* Кнопки */
+/* Buttons */
 #buttons {
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
 }
 
-#copyButton,
-#resendButton {
+#buttons button {
     background-color: transparent;
     border: none;
     padding: 8px;
@@ -111,18 +110,16 @@
     margin-left: 10px;
 }
 
-#copyButton img,
-#resendButton img {
+#buttons button svg {
     width: 20px;
     height: 20px;
 }
 
-#copyButton:hover,
-#resendButton:hover {
+#buttons button:hover {
     transform: scale(1);
 }
 
-/* Поле ввода */
+/* Input field */
 #chatInputContainer {
     display: flex;
     margin-top: 15px;

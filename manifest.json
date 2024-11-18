@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Улучшение выделенного текста с помощью OpenAI",
+  "name": "LMenu",
   "version": "1.1",
-  "description": "Отправляет выделенный текст в OpenAI для улучшения качества",
+  "description": "A lot of useful LLM features to work with selected text.",
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "background": {
     "service_worker": "dist/background.bundle.js"
