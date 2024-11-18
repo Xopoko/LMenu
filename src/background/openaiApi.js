@@ -1,9 +1,9 @@
 // src/background/openaiApi.js
 
 /**
- * Отправляет запрос к OpenAI и обрабатывает потоковый ответ.
- * @param {Object} payload - Данные запроса от content script.
- * @param {Object} ongoingRequests - Объект для отслеживания текущих запросов.
+ * Sends a request to OpenAI and handles the streaming response.
+ * @param {Object} payload - Data from content script.
+ * @param {Object} ongoingRequests - Object to track ongoing requests.
  * @returns {Promise<void>}
  */
 export async function sendToOpenAI(payload, ongoingRequests) {
@@ -16,7 +16,11 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     requestId,
   } = payload;
 
-  // Получение API ключа из chrome.storage
+  if (!tabId || typeof tabId !== 'number') {
+    throw new Error("Invalid tab ID.");
+  }
+
+  // Get API key from chrome.storage
   const apiKey = await new Promise((resolve) => {
     chrome.storage.sync.get(["openaiApiKey"], (result) => {
       resolve(result.openaiApiKey);
@@ -27,14 +31,14 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     throw new Error("API key not set. Please set it in the extension settings.");
   }
 
-  // Создание AbortController для возможности отмены запроса
+  // Create AbortController for request cancellation
   const abortController = new AbortController();
   ongoingRequests[requestId] = { controller: abortController, tabId };
 
-  // Формирование сообщений для отправки в OpenAI
+  // Build messages for OpenAI
   const messages = [];
 
-  // Добавление системного сообщения на основе выбранного типа подсказки
+  // Add system message based on selected prompt
   if (promptType) {
     const promptsData = await fetch(chrome.runtime.getURL("prompts.json")).then(
       (res) => res.json()
@@ -47,7 +51,7 @@ export async function sendToOpenAI(payload, ongoingRequests) {
       throw new Error("Prompt not found.");
     }
 
-    // Обработка системного контента с заменой языка, если указан
+    // Process system content with language replacement
     let processedSystemContent = selectedPrompt.systemContent;
     if (promptLanguage) {
       processedSystemContent = processedSystemContent.replace(
@@ -57,18 +61,17 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     }
 
     messages.push({ role: "system", content: processedSystemContent });
-  } else {
-    // Добавление предыдущего контекста, если подсказка не указана
-    messages.push({
-      role: "system",
-      content: `Here is the context of our conversation: ${previousContext}`,
-    });
   }
 
-  // Добавление сообщения пользователя
+  // Add previous conversation context
+  if (previousContext) {
+    messages.push(...previousContext);
+  }
+
+  // Add user message
   messages.push({ role: "user", content: text });
 
-  // Отправка запроса к OpenAI API
+  // Send request to OpenAI API
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -76,7 +79,7 @@ export async function sendToOpenAI(payload, ongoingRequests) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o",
+      model: "gpt-4o", // Update model as per your usage
       stream: true,
       messages,
     }),
@@ -87,16 +90,16 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     throw new Error(`Server error: ${response.status} ${response.statusText}`);
   }
 
-  // Чтение и обработка потокового ответа
+  // Read and process the streaming response
   readStream(response.body.getReader(), tabId, requestId, ongoingRequests);
 }
 
 /**
- * Функция для чтения потокового ответа от OpenAI
- * @param {ReadableStreamDefaultReader} reader - Объект для чтения потока
- * @param {number} tabId - ID вкладки для отправки сообщений
- * @param {string} requestId - ID запроса для отслеживания
- * @param {Object} ongoingRequests - Объект текущих запросов
+ * Reads the streaming response from OpenAI.
+ * @param {ReadableStreamDefaultReader} reader - Stream reader.
+ * @param {number} tabId - Tab ID to send messages.
+ * @param {string} requestId - Request ID for tracking.
+ * @param {Object} ongoingRequests - Ongoing requests object.
  */
 function readStream(reader, tabId, requestId, ongoingRequests) {
   const decoder = new TextDecoder("utf-8");
@@ -151,11 +154,11 @@ function readStream(reader, tabId, requestId, ongoingRequests) {
 }
 
 /**
- * Обработка ошибок при чтении потока
- * @param {Error} error - Ошибка
- * @param {number} tabId - ID вкладки
- * @param {string} requestId - ID запроса
- * @param {Object} ongoingRequests - Объект текущих запросов
+ * Handles errors during stream reading.
+ * @param {Error} error - Error object.
+ * @param {number} tabId - Tab ID.
+ * @param {string} requestId - Request ID.
+ * @param {Object} ongoingRequests - Ongoing requests object.
  */
 function handleError(error, tabId, requestId, ongoingRequests) {
   if (error.name === "AbortError") {
@@ -177,11 +180,11 @@ function handleError(error, tabId, requestId, ongoingRequests) {
 }
 
 /**
- * Функция для отмены текущего запроса
- * @param {Object} payload - Данные запроса
- * @param {Object} ongoingRequests - Объект текущих запросов
+ * Cancels the current request.
+ * @param {Object} payload - Request data.
+ * @param {Object} ongoingRequests - Ongoing requests object.
  */
-export function cancelCurrentRequest(payload, ongoingRequests) {
+export async function cancelCurrentRequest(payload, ongoingRequests) {
   const { requestId } = payload;
   if (ongoingRequests[requestId]) {
     ongoingRequests[requestId].controller.abort();

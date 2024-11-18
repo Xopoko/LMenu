@@ -1,12 +1,14 @@
-// src/content/MessageHandler.js
+// src/content/messageHandler.js
 
-import { appendResultText, setNeedNewMessage } from "../common/chatUtils";
+import {
+  appendResultText,
+  addAssistantMessage,
+  getContext,
+} from "../common/chatUtils";
 
 class ContentMessageHandler {
   constructor() {
     this.currentRequestId = null;
-    this.currentTabId = null;
-    this.markdownBuffer = "";
     this.initListener();
   }
 
@@ -19,10 +21,18 @@ class ContentMessageHandler {
         console.log("Message received:", message);
         switch (message.action) {
           case "streamData":
-            appendResultText(message.content);
+            appendResultText(message.content); // Добавляем текст в поток
             break;
           case "streamComplete":
-            setNeedNewMessage();
+            // Указываем, что сообщение завершено
+            appendResultText("", true); // Завершаем вывод сообщения
+            console.log("Stream complete");
+
+            // Добавляем текст ассистента в контекст
+            const completedMessage = getContext().at(-1)?.content; // Последнее сообщение
+            if (completedMessage) {
+              addAssistantMessage(completedMessage);
+            }
             break;
           case "streamError":
             console.error("Stream error:", message.error);
@@ -37,13 +47,13 @@ class ContentMessageHandler {
     });
   }
 
-  // Отправка сообщения в background
+  // Send message to background
   sendMessage(action, payload) {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage({ action, payload }, (response) => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
-        } else if (!response.success) {
+        } else if (!response || !response.success) {
           reject(new Error(response.error || "Unknown error."));
         } else {
           resolve(response.data);
@@ -52,42 +62,14 @@ class ContentMessageHandler {
     });
   }
 
-  // Отправка запроса без контекста
-async sendRequest(text, promptType = null, promptLanguage = null) {
-  this.clearContext();
-  this.currentRequestId = Date.now() + Math.random();
-  this.currentTabId = await this.getCurrentTabId();
-
-  const payload = {
-    text,
-    promptType,
-    promptLanguage,
-    tabId: this.currentTabId,
-    requestId: this.currentRequestId,
-  };
-
-  try {
-    await this.sendMessage("sendToOpenAI", payload);
-    console.log("Request sent successfully");
-  } catch (error) {
-    console.error("Error sending request:", error);
-    alert(error.message || "Unknown error.");
-  }
-}
-
-  // Отправка запроса с контекстом
-  async sendRequestWithContext(text) {
-    this.clearContext();
+  // Send request without context
+  async sendRequest(text, promptType, promptLanguage) {
     this.currentRequestId = Date.now() + Math.random();
-    this.currentTabId = await this.getCurrentTabId();
-
-    const previousContext = getContext();
-
     const payload = {
       text,
-      tabId: this.currentTabId,
+      promptType,
+      promptLanguage,
       requestId: this.currentRequestId,
-      previousContext,
     };
 
     try {
@@ -99,41 +81,37 @@ async sendRequest(text, promptType = null, promptLanguage = null) {
     }
   }
 
-  // Отмена текущего запроса
+  // Send request with context
+  async sendRequestWithContext(text) {
+    this.currentRequestId = Date.now() + Math.random();
+    const context = getContext();
+    const payload = {
+      text,
+      previousContext: context,
+      requestId: this.currentRequestId,
+    };
+
+    try {
+      await this.sendMessage("sendToOpenAI", payload);
+      console.log("Request sent successfully");
+    } catch (error) {
+      console.error("Error sending request:", error);
+      alert(error.message || "Unknown error.");
+    }
+  }
+
+  // Cancel current request
   cancelCurrentRequest() {
     if (this.currentRequestId) {
       const payload = { requestId: this.currentRequestId };
       this.sendMessage("cancelRequest", payload)
         .then(() => {
-          this.clearContext();
           console.log("Request cancelled successfully");
         })
         .catch((error) => {
           console.error("Error cancelling request:", error);
         });
     }
-  }
-
-  // Получение текущего ID вкладки
-  async getCurrentTabId() {
-    try {
-      const data = await this.sendMessage("getTabId", {});
-      return data;
-    } catch (error) {
-      console.error("Failed to get tabId:", error);
-      return null;
-    }
-  }
-
-  // Очистка контекста
-  clearContext() {
-    // const resultText = shadowRoot.getElementById("resultText");
-    // if (resultText) {
-    //   resultText.innerHTML = "";
-    // }
-
-    this.markdownBuffer = "";
-    this.currentRequestId = null;
   }
 }
 

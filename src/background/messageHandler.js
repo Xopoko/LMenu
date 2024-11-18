@@ -1,16 +1,10 @@
 // src/background/messageHandler.js
 
-import { sendToOpenAI, cancelCurrentRequest } from "./openaiApi"; // Импорт зависимостей
+import { sendToOpenAI, cancelCurrentRequest } from "./openaiApi.js";
 
-/**
- * Класс для обработки сообщений в background-скрипте
- */
 class BackgroundMessageHandler {
   constructor() {
-    // Словарь для отслеживания текущих запросов
     this.ongoingRequests = {};
-
-    // Инициализация слушателя сообщений
     this.initListener();
   }
 
@@ -20,75 +14,75 @@ class BackgroundMessageHandler {
   initListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log("Message received:", request);
-      if (request.action && typeof this[request.action] === "function") {
-        try {
-          const result = this[request.action](request.payload, sender);
 
-          // Обработка асинхронных методов
-          if (result instanceof Promise) {
-            result
-              .then((data) => sendResponse({ success: true, data }))
-              .catch((error) => {
-                console.error("Async handler error:", error);
-                sendResponse({ success: false, error: error.message });
-              });
-          } else {
-            sendResponse({ success: true, data: result });
-          }
-        } catch (error) {
-          console.error("Error handling message:", error);
-          sendResponse({ success: false, error: error.message });
+      if (request.action && typeof this[request.action] === "function") {
+        // Ensure payload exists
+        request.payload = request.payload || {};
+
+        // Include tabId in payload if available
+        if (sender.tab && sender.tab.id !== undefined) {
+          request.payload.tabId = sender.tab.id;
+        } else {
+          console.error("sender.tab.id is undefined");
+          sendResponse({ success: false, error: "Tab ID is missing." });
+          return;
         }
+
+        this[request.action](request.payload)
+          .then((data) => sendResponse({ success: true, data }))
+          .catch((error) => {
+            console.error("Handler error:", error);
+            sendResponse({ success: false, error: error.message });
+          });
+
+        return true; // Indicates that sendResponse will be called asynchronously
       } else {
         console.warn("Unknown action:", request.action);
         sendResponse({ success: false, error: "Unknown action" });
       }
-
-      return true; // Указываем, что ответ будет асинхронным
     });
   }
 
   /**
-   * Получить ID текущей вкладки
-   * @param {Object} payload - Данные запроса
-   * @param {Object} sender - Информация об отправителе
-   * @returns {number|null} - ID вкладки
+   * Retrieves the current tab ID.
+   * @param {Object} payload - Request data.
+   * @param {Object} sender - Sender information.
+   * @returns {Promise<number|null>} - The tab ID.
    */
-  getTabId(payload, sender) {
+  async getTabId(payload, sender) {
     return sender.tab ? sender.tab.id : null;
   }
 
   /**
-   * Отправить запрос к OpenAI
-   * @param {Object} payload - Данные для OpenAI
-   * @returns {Promise<Object>} - Ответ OpenAI
+   * Sends a request to OpenAI.
+   * @param {Object} payload - Data for OpenAI.
+   * @returns {Promise<void>}
    */
   async sendToOpenAI(payload) {
     console.log("Sending data to OpenAI:", payload);
-    // Используем импортированную функцию sendToOpenAI
-    return await sendToOpenAI(payload, this.ongoingRequests);
+    await sendToOpenAI(payload, this.ongoingRequests);
   }
 
   /**
-   * Отменить текущий запрос
-   * @param {Object} payload - Данные запроса
-   * @returns {string} - Статус отмены
+   * Cancels the current request.
+   * @param {Object} payload - Request data.
+   * @returns {Promise<string>} - Cancellation status.
    */
-  cancelRequest(payload) {
-    cancelCurrentRequest(payload, this.ongoingRequests);
+  async cancelRequest(payload) {
+    await cancelCurrentRequest(payload, this.ongoingRequests);
     return "Request cancelled successfully";
   }
 
   /**
-   * Логировать сообщение
-   * @param {Object} payload - Данные сообщения
-   * @returns {string} - Подтверждение логирования
+   * Logs a message.
+   * @param {Object} payload - Message data.
+   * @returns {Promise<string>} - Confirmation.
    */
-  logMessage(payload) {
+  async logMessage(payload) {
     console.log("Log message from content script:", payload);
     return "Message logged successfully";
   }
 }
 
-// Экспортируем экземпляр класса
+// Export an instance of the class
 export default new BackgroundMessageHandler();
