@@ -85,12 +85,30 @@
     max-width: 80%;
 }
 
-.gptResponse {
-    align-self: flex-start;
-    background-color: #f0f4fa;
+/* Code blocks within GPT responses */
+.gptResponse pre {
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
     padding: 10px;
-    border-radius: 10px;
-    max-width: 80%;
+    background-color: #f6f8fa;
+    border-radius: 6px;
+}
+
+/* Inline code styling */
+.gptResponse code {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    background-color: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 90%;
+}
+
+/* Adjust the message container to prevent overflow */
+.gptResponse {
+    word-break: break-word;
 }
 
 /* Buttons */

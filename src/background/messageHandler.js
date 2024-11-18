@@ -9,7 +9,7 @@ class BackgroundMessageHandler {
   }
 
   /**
-   * Инициализация слушателя для входящих сообщений
+   * Initializes the listener for incoming messages
    */
   initListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

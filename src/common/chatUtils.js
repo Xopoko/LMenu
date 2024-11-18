@@ -1,16 +1,20 @@
 // src/common/chatUtils.js
 
 import { marked } from "marked";
-import hljs from "highlight.js/lib/core";
-import javascript from "highlight.js/lib/languages/javascript";
+import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
-
-hljs.registerLanguage("javascript", javascript);
 
 marked.setOptions({
   highlight: function (code, lang) {
-    const language = hljs.getLanguage(lang) ? lang : "plaintext";
-    return hljs.highlight(code, { language }).value;
+    let result;
+    if (lang && hljs.getLanguage(lang)) {
+      // Use the specified language if it's valid
+      result = hljs.highlight(code, { language: lang }).value;
+    } else {
+      // Auto-detect the language if none is specified or invalid
+      result = hljs.highlightAuto(code).value;
+    }
+    return result;
   },
 });
 
