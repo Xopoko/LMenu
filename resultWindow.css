@@ -7,8 +7,9 @@
     z-index: 1000;
     color: #333;
     border-radius: 10px;
-    width: 600px;
-    max-width: 90%;
+    width: 90%;
+    max-width: 600px;
+    min-width: 320px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     left: 50%;
     top: 50%;
@@ -70,9 +71,9 @@
 }
 
 /* Основное содержимое */
-#resultTextContainer {
+#chatContainer {
     position: relative;
-    padding: 0;
+    padding: 15px;
     background-color: #fafafa;
     border-radius: 10px;
     border: 1px solid #eee;
@@ -116,14 +117,13 @@
 #resendButton {
     position: absolute;
     bottom: 10px;
-    /* Полупрозрачный фон */
     background-color: transparent;
-    color: #00000028;
+    color: rgba(0, 0, 0, 0.6);
     border: none;
     padding: 8px;
     cursor: pointer;
     transform: scale(0.7);
-    transition: color 0.3s, transform 0.1s ease-in-out;
+    transition: color 0.3s ease, transform 0.25s ease-in-out;
 }
 
 #copyButton {
@@ -136,10 +136,8 @@
 
 #copyButton:hover,
 #resendButton:hover {
-    color: #0057b32f;
+    color: rgba(0, 91, 179, 0.5);
     transform: scale(0.8);
-    transition: transform 0.25s ease-in-out;
-    /* Увеличение прозрачности при наведении */
 }
 
 #copyButton i,
@@ -152,4 +150,56 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
+}
+
+#chatInputContainer {
+    display: flex;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+#chatInput {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#sendButton {
+    padding: 8px 12px;
+    background-color: #4285F4;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#sendButton:hover {
+    background-color: #357ae8;
+}
+
+#chatMessages {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.userMessage {
+    align-self: flex-end;
+    background-color: #e1f5d3;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.gptResponse {
+    align-self: flex-start;
+    background-color: #f0f4fa;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 80%;
 }

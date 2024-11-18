@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Result Window</title>
-    <!-- Подключаем CSS файл -->
     <link rel="stylesheet" href="resultWindow.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
@@ -13,58 +12,55 @@
 <body>
     <div id="resultWindow">
         <header>
-            <h2>Результат</h2>
+            <h2>LMenu</h2>
             <button id="closeButton">&times;</button>
         </header>
 
         <!-- Селекторы -->
         <div id="selectors">
-            <select id="promptSelector"></select>
-            <select id="promptLanguageSelector"></select>
+            <select id="promptSelector" aria-label="Выбор подсказки"></select>
+            <select id="promptLanguageSelector" aria-label="Выбор языка"></select>
         </div>
 
         <!-- Результат -->
-        <div id="resultTextContainer">
-            <div id="resultText"></div>
-                <div id="buttons">
-                    <button id="resendButton" onclick="copyToClipboard()">
-                        <i class="fa-solid fa-arrows-rotate"></i>
-                    </button>
-                    
-                    <button id="copyButton" onclick="copyToClipboard()">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
+        <div id="chatContainer"></div>
+            <div id="chatMessages"></div> <!-- Контейнер для сообщений чата -->
+        <!-- Кнопки -->
+            <div id="buttons">
+                <button id="resendButton" aria-label="Повторить запрос">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+
+                <button id="copyButton" aria-label="Скопировать текст">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Поле ввода и кнопка отправки -->
+        <div id="chatInputContainer">
+            <input type="text" id="chatInput" placeholder="Введите сообщение..." aria-label="Ввод сообщения" />
+            <button id="sendButton" aria-label="Отправить сообщение">Отправить</button>
         </div>
     </div>
 
-    <!-- Добавляем тестовые данные только в режиме разработки -->
     <script>
         if (window.location.hostname === '127.0.0.1') {  // Проверка на режим разработки
-            document.getElementById('promptSelector').innerHTML = `
+            const promptSelector = document.getElementById('promptSelector');
+            const promptLanguageSelector = document.getElementById('promptLanguageSelector');
+            const chatMessages = document.getElementById('chatMessages');
+
+            promptSelector.innerHTML = `
                 <option value="1">Тестовый запрос 1</option>
                 <option value="2">Тестовый запрос 2</option>
                 <option value="3">Тестовый запрос 3</option>
             `;
-            document.getElementById('promptLanguageSelector').innerHTML = `
+            promptLanguageSelector.innerHTML = `
                 <option value="ru">Русский</option>
                 <option value="en">Английский</option>
             `;
-            document.getElementById('resultText').innerHTML = `
+            chatMessages.innerHTML = `
                 <h3>Пример результата</h3>
                 <p>Это тестовый текст результата для предпросмотра.</p>
-                <p>Вы можете добавить <code>HTML</code> или <strong>другие элементы</strong> для проверки отображения.</p>
-                <ul>
-                    <li>Пункт 1</li>
-                    <li>Пункт 2</li>
-                    <li>Пункт 3</li>
-                    <li>Пункт 4</li>
-                    <li>Пункт 5</li>
-                    <li>Пункт 6</li>
-                    <li>Пункт 7</li>
-                    <li>Пункт 8</li>
-                    <li>Пункт 9</li>
-                </ul>
             `;
         }
     </script>

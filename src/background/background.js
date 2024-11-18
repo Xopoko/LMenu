@@ -1,8 +1,5 @@
 // src/background/background.js
 
-import { handleMessages } from "./messageHandler";
+import BackgroundMessageHandler from "./messageHandler.js";
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	handleMessages(request, sender, sendResponse);
-	return true;
-});
+console.log("Background script initialized.");

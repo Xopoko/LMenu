@@ -1,19 +1,19 @@
 // src/common/utils.js
 
-import { shadowRoot } from "./ui"; // Import shadowRoot directly from ui.js
 import { marked } from "marked";
-import { markdownBuffer } from "./api";
 import hljs from "highlight.js/lib/core";
 import swift from "highlight.js/lib/languages/swift";
 import "highlight.js/styles/github.css";
 
 hljs.registerLanguage("swift", swift);
 
-marked.setOptions({
-	highlight: (code, lang) => {
-		const language = lang && hljs.getLanguage(lang) ? lang : "plaintext";
-		return hljs.highlight(code, { language }).value;
-	},
+marked.use({
+  renderer: {
+    code: (code, lang) => {
+      const language = lang && hljs.getLanguage(lang) ? lang : "plaintext";
+      return hljs.highlight(code, { language }).value;
+    },
+  },
 });
 
 export function addSelectionListener() {
@@ -33,24 +33,6 @@ export function addSelectionListener() {
 	});
 }
 
-export function addInputListener() {
-	document.addEventListener("input", (e) => {
-		if (["input", "textarea"].includes(e.target.tagName.toLowerCase())) {
-			const inputElement = e.target;
-			const text = inputElement.value;
-			// currentInputElement = inputElement;
-
-			// Запрос на автодополнение
-			if (text.length > 0) {
-				// debouncedRequestCompletion(text, inputElement);
-
-			} // else {
-				// removeOverlay();
-			// }
-		}
-	});
-}
-
 export async function loadResultWindowResources() {
 	const [htmlContent, cssContent] = await Promise.all([
 		fetch(chrome.runtime.getURL("resultWindow.html")).then((res) => res.text()),
@@ -60,18 +42,12 @@ export async function loadResultWindowResources() {
 }
 export async function loadCompletionWindowResources() {
 	const [htmlContent, cssContent] = await Promise.all([
-		fetch(chrome.runtime.getURL("completionWindow.html")).then((res) => res.text()),
+		fetch(chrome.runtime.getURL("completionWindow.html")).then((res) =>
+			res.text()
+		),
 		fetch(chrome.runtime.getURL("resultWindow.css")).then((res) => res.text()),
 	]);
 	return { htmlContent, cssContent };
-}
-
-export function appendResultText(text) {
-	const resultText = shadowRoot.getElementById("resultText");
-	if (resultText) {
-		markdownBuffer += text;
-		resultText.innerHTML = marked(markdownBuffer);
-	}
 }
 
 export function makeWindowDraggable(element) {
