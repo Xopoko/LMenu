@@ -158,43 +158,46 @@ function initializeResultWindow() {
 }
 
 async function initializeSelectors(promptSelector, promptLanguageSelector) {
-  try {
-    const [promptsData, storedValues] = await Promise.all([
-      fetch(chrome.runtime.getURL("prompts.json"))
-        .then((res) => res.json())
-        .catch((err) => {
-          console.error("Failed to fetch prompts.json:", err);
-          throw err;
-        }),
-      new Promise((resolve) => {
-        chrome.storage.sync.get(
-          ["lastSelectedPrompt", "lastSelectedLanguage"],
-          (result) => {
-            resolve(result);
-          }
+    try {
+        const [storedData, storedValues] = await Promise.all([
+            new Promise((resolve) => {
+                chrome.storage.sync.get(['prompts', 'languages'], (result) => {
+                    resolve(result);
+                });
+            }),
+            new Promise((resolve) => {
+                chrome.storage.sync.get(
+                    ['lastSelectedPrompt', 'lastSelectedLanguage'],
+                    (result) => {
+                        resolve(result);
+                    }
+                );
+            }),
+        ]);
+
+        const prompts = storedData.prompts || [];
+        const languages = storedData.languages || [];
+
+        if (prompts.length === 0 || languages.length === 0) {
+            // Если данных нет, можно обработать ошибку или установить значения по умолчанию
+            console.error('No prompts or languages found in storage.');
+            return;
+        }
+
+        populateSelector(
+            promptSelector,
+            prompts.map((p) => p.name),
+            storedValues.lastSelectedPrompt
         );
-      }),
-    ]);
+        promptType = promptSelector.value;
 
-    if (!promptsData) {
-      console.error("promptsData is undefined");
-      return;
+        populateSelector(
+            promptLanguageSelector,
+            languages,
+            storedValues.lastSelectedLanguage
+        );
+        promptLanguage = promptLanguageSelector.value;
+    } catch (error) {
+        console.error('Error initializing selectors:', error);
     }
-
-    populateSelector(
-      promptSelector,
-      promptsData.prompts.map((p) => p.name),
-      storedValues.lastSelectedPrompt
-    );
-    promptType = promptSelector.value;
-
-    populateSelector(
-      promptLanguageSelector,
-      promptsData.languages,
-      storedValues.lastSelectedLanguage
-    );
-    promptLanguage = promptLanguageSelector.value;
-  } catch (error) {
-    console.error("Error initializing selectors:", error);
-  }
 }
