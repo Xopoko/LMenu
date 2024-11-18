@@ -7,8 +7,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/LMenu_Chrome_Extension.git
-cd LMenu_Chrome_Extension
+git clone https://github.com/Xopoko/LMenu.git
+cd LMenu
 ```
 
 ### 2. Install Dependencies
@@ -38,7 +38,7 @@ Toggle the **Developer mode** switch in the top right corner of the page.
 ### 3. Load the Unpacked Extension
 
 - Click on the **Load unpacked** button.
-- In the file dialog, navigate to the `LMenu_Chrome_Extension` directory.
+- In the file dialog, navigate to the `LMenu` directory.
 - Select the directory and click **Open**.
 
 The extension should now appear in your list of installed extensions.
