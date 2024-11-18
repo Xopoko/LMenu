@@ -67,14 +67,13 @@ function initializeResultWindow() {
   console.log("Initializing result window...");
   const resultWindow = shadowRoot.getElementById("resultWindow");
   const promptSelector = shadowRoot.getElementById("promptSelector");
-  const promptLanguageSelector = shadowRoot.getElementById(
-    "promptLanguageSelector"
-  );
+  const promptLanguageSelector = shadowRoot.getElementById("promptLanguageSelector");
   const copyButton = shadowRoot.getElementById("copyButton");
   const resendButton = shadowRoot.getElementById("resendButton");
   const closeButton = shadowRoot.getElementById("closeButton");
   const sendButton = shadowRoot.getElementById("sendButton");
   const chatInput = shadowRoot.getElementById("chatInput");
+  const settingsButton = shadowRoot.getElementById("settingsButton");
 
   sendButton.addEventListener("click", () => {
     const userMessage = chatInput.value.trim();
@@ -91,6 +90,10 @@ function initializeResultWindow() {
       extensionContainer.remove();
     }
     ContentMessageHandler.cancelCurrentRequest();
+  });
+
+  settingsButton.addEventListener("click", () => {
+      ContentMessageHandler.openOptionsPage();
   });
 
   copyButton.addEventListener("click", async () => {

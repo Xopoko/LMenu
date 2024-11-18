@@ -113,6 +113,10 @@ class ContentMessageHandler {
         });
     }
   }
+
+  openOptionsPage() {
+    chrome.runtime.sendMessage({ action: "showOptions" });
+  }
 }
 
 export default new ContentMessageHandler();

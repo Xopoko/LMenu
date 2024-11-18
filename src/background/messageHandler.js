@@ -36,6 +36,9 @@ class BackgroundMessageHandler {
           });
 
         return true; // Indicates that sendResponse will be called asynchronously
+      } else if (request.action === "showOptions") {
+        this.showOptions();
+        sendResponse({ success: true, message: "Options page opened" });
       } else {
         console.warn("Unknown action:", request.action);
         sendResponse({ success: false, error: "Unknown action" });
@@ -81,6 +84,10 @@ class BackgroundMessageHandler {
   async logMessage(payload) {
     console.log("Log message from content script:", payload);
     return "Message logged successfully";
+  }
+
+  async showOptions() {
+    chrome.runtime.openOptionsPage();
   }
 }
 
