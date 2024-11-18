@@ -12,7 +12,7 @@ class ContentMessageHandler {
     this.initListener();
   }
 
-  // Инициализация слушателя сообщений от background
+  // Initialize message listener from background
   initListener() {
     chrome.runtime.onMessage.addListener((message) => {
       if (message.requestId !== this.currentRequestId) return;
@@ -21,15 +21,15 @@ class ContentMessageHandler {
         console.log("Message received:", message);
         switch (message.action) {
           case "streamData":
-            appendResultText(message.content); // Добавляем текст в поток
+            appendResultText(message.content); // Append text to stream
             break;
           case "streamComplete":
-            // Указываем, что сообщение завершено
-            appendResultText("", true); // Завершаем вывод сообщения
+            // Indicate that the message is complete
+            appendResultText("", true); // Complete the message output
             console.log("Stream complete");
 
-            // Добавляем текст ассистента в контекст
-            const completedMessage = getContext().at(-1)?.content; // Последнее сообщение
+            // Add assistant text to context
+            const completedMessage = getContext().at(-1)?.content; // Last message
             if (completedMessage) {
               addAssistantMessage(completedMessage);
             }

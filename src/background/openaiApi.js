@@ -20,16 +20,47 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     throw new Error("Invalid tab ID.");
   }
 
-  // Get API key from chrome.storage
-  const apiKey = await new Promise((resolve) => {
-    chrome.storage.sync.get(["openaiApiKey"], (result) => {
-      resolve(result.openaiApiKey);
-    });
-  });
+  // Get API keys and prompts from chrome.storage
+  const [apiKeysResult, promptsResult] = await Promise.all([
+    new Promise((resolve) => {
+      chrome.storage.sync.get(['apiKeys'], (result) => {
+        resolve(result);
+      });
+    }),
+    new Promise((resolve) => {
+      chrome.storage.sync.get(['prompts'], (result) => {
+        resolve(result);
+      });
+    }),
+  ]);
 
-  if (!apiKey) {
-    throw new Error("API key not set. Please set it in the extension settings.");
+  const apiKeys = apiKeysResult.apiKeys || [];
+  const prompts = promptsResult.prompts || [];
+
+  // Determine which API key to use
+  let selectedApiKeyEntry = null;
+
+  if (promptType) {
+    const selectedPrompt = prompts.find((prompt) => prompt.name === promptType);
+    if (!selectedPrompt) {
+      throw new Error('Prompt not found.');
+    }
+
+    const apiKeyName = selectedPrompt.apiKeyName;
+    selectedApiKeyEntry = apiKeys.find((key) => key.name === apiKeyName);
   }
+
+  if (!selectedApiKeyEntry && apiKeys.length > 0) {
+    // If no API key specified for prompt, use the first one
+    selectedApiKeyEntry = apiKeys[0];
+  }
+
+  if (!selectedApiKeyEntry) {
+    throw new Error('No API key available. Please add an API key in the extension settings.');
+  }
+
+  const selectedApiKey = selectedApiKeyEntry.key;
+  const selectedModel = selectedApiKeyEntry.model || 'gpt-3.5-turbo';
 
   // Create AbortController for request cancellation
   const abortController = new AbortController();
@@ -40,28 +71,21 @@ export async function sendToOpenAI(payload, ongoingRequests) {
 
   // Add system message based on selected prompt
   if (promptType) {
-    // Получение промптов из chrome.storage
-    const prompts = await new Promise((resolve) => {
-        chrome.storage.sync.get(['prompts'], (result) => {
-            resolve(result.prompts || []);
-        });
-    });
-
     const selectedPrompt = prompts.find(
-        (prompt) => prompt.name === promptType
+      (prompt) => prompt.name === promptType
     );
 
     if (!selectedPrompt) {
-        throw new Error('Prompt not found.');
+      throw new Error('Prompt not found.');
     }
 
-    // Обработка systemContent с заменой языка
+    // Process systemContent, replacing {language} placeholder
     let processedSystemContent = selectedPrompt.systemContent;
     if (promptLanguage) {
-        processedSystemContent = processedSystemContent.replace(
-            /\{language\}/g,
-            promptLanguage
-        );
+      processedSystemContent = processedSystemContent.replace(
+        /\{language\}/g,
+        promptLanguage
+      );
     }
 
     messages.push({ role: 'system', content: processedSystemContent });
@@ -80,10 +104,10 @@ export async function sendToOpenAI(payload, ongoingRequests) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${selectedApiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o", // Update model as per your usage
+      model: selectedModel,
       stream: true,
       messages,
     }),
