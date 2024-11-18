@@ -1,46 +1,232 @@
-<!-- options.html -->
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Extension settings</title>
+    <title>Extension Settings</title>
     <style>
+        /* Общие стили */
         body {
-            font-family: Arial, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
             padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            color: #555;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
+            font-weight: 600;
         }
 
-        input {
+        input[type="text"],
+        input[type="password"],
+        textarea {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
         button {
-            padding: 10px 15px;
+            display: inline-block;
+            padding: 10px 20px;
             background-color: #4285F4;
             color: #fff;
             border: none;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
         }
 
         button:hover {
             background-color: #3073E0;
         }
+
+        .button-secondary {
+            background-color: #aaa;
+            margin-left: 10px;
+        }
+
+        .button-secondary:hover {
+            background-color: #888;
+        }
+
+        /* Стили для списка элементов */
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item span {
+            flex-grow: 1;
+            font-size: 16px;
+        }
+
+        .item button {
+            margin-left: 5px;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        /* Стили для форм */
+        .form-container {
+            display: none;
+            margin-top: 20px;
+            background-color: #fafafa;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-container label {
+            margin-top: 10px;
+        }
+
+        /* Стили для заголовков */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header h2 {
+            margin: 0;
+        }
+
+        /* Стили для кнопок добавления */
+        .add-button {
+            background-color: #28a745;
+        }
+
+        .add-button:hover {
+            background-color: #218838;
+        }
+
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .item button {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-header button {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <h1>Settings</h1>
-    <label for="apiKey">OpenAI API key:</label>
-    <input type="password" id="apiKey" placeholder="sk-...">
-    <button id="saveButton">Save</button>
+    <h1>Extension Settings</h1>
+
+    <!-- Раздел API ключа -->
+    <div class="section">
+        <h2>API Key</h2>
+        <label for="apiKey">OpenAI API key:</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+        <button id="saveButton">Save API Key</button>
+    </div>
+
+    <!-- Раздел промптов -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Prompts</h2>
+            <button id="addPromptButton" class="add-button">Add Prompt</button>
+        </div>
+        <ul id="promptsContainer" class="item-list">
+            <!-- Список промптов будет здесь -->
+        </ul>
+
+        <!-- Форма для добавления/редактирования промптов -->
+        <div id="promptForm" class="form-container">
+            <h3 id="promptFormTitle">Add New Prompt</h3>
+            <label for="promptName">Prompt Name:</label>
+            <input type="text" id="promptName" placeholder="Enter prompt name">
+            <label for="promptContent">Prompt Content:</label>
+            <textarea id="promptContent" placeholder="Enter prompt content"></textarea>
+            <button id="savePromptButton">Save Prompt</button>
+            <button id="cancelPromptButton" class="button-secondary">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Раздел языков -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Languages</h2>
+            <button id="addLanguageButton" class="add-button">Add Language</button>
+        </div>
+        <ul id="languagesContainer" class="item-list">
+            <!-- Список языков будет здесь -->
+        </ul>
+
+        <!-- Форма для добавления языка -->
+        <div id="languageForm" class="form-container">
+            <h3>Add New Language</h3>
+            <label for="languageName">Language Name:</label>
+            <input type="text" id="languageName" placeholder="Enter language name">
+            <button id="saveLanguageButton">Save Language</button>
+            <button id="cancelLanguageButton" class="button-secondary">Cancel</button>
+        </div>
+    </div>
 
     <script src="options.js"></script>
 </body>

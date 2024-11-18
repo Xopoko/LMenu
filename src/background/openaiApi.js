@@ -40,27 +40,31 @@ export async function sendToOpenAI(payload, ongoingRequests) {
 
   // Add system message based on selected prompt
   if (promptType) {
-    const promptsData = await fetch(chrome.runtime.getURL("prompts.json")).then(
-      (res) => res.json()
-    );
-    const selectedPrompt = promptsData.prompts.find(
-      (prompt) => prompt.name === promptType
+    // Получение промптов из chrome.storage
+    const prompts = await new Promise((resolve) => {
+        chrome.storage.sync.get(['prompts'], (result) => {
+            resolve(result.prompts || []);
+        });
+    });
+
+    const selectedPrompt = prompts.find(
+        (prompt) => prompt.name === promptType
     );
 
     if (!selectedPrompt) {
-      throw new Error("Prompt not found.");
+        throw new Error('Prompt not found.');
     }
 
-    // Process system content with language replacement
+    // Обработка systemContent с заменой языка
     let processedSystemContent = selectedPrompt.systemContent;
     if (promptLanguage) {
-      processedSystemContent = processedSystemContent.replace(
-        /\{language\}/g,
-        promptLanguage
-      );
+        processedSystemContent = processedSystemContent.replace(
+            /\{language\}/g,
+            promptLanguage
+        );
     }
 
-    messages.push({ role: "system", content: processedSystemContent });
+    messages.push({ role: 'system', content: processedSystemContent });
   }
 
   // Add previous conversation context
