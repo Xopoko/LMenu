@@ -98,7 +98,6 @@
 /* Inline code styling */
 .gptResponse code {
     word-wrap: break-word;
-    white-space: pre-wrap;
     background-color: #f6f8fa;
     padding: 2px 4px;
     border-radius: 4px;

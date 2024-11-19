@@ -1,22 +1,17 @@
 // src/common/chatUtils.js
 
-import { marked } from "marked";
-import hljs from "highlight.js";
-import "highlight.js/styles/github.css";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import hljs from 'highlight.js';
 
-marked.setOptions({
-  highlight: function (code, lang) {
-    let result;
-    if (lang && hljs.getLanguage(lang)) {
-      // Use the specified language if it's valid
-      result = hljs.highlight(code, { language: lang }).value;
-    } else {
-      // Auto-detect the language if none is specified or invalid
-      result = hljs.highlightAuto(code).value;
+const marked = new Marked(
+  markedHighlight({
+    highlight(code, lang, info) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
     }
-    return result;
-  },
-});
+  })
+);
 
 export let chatContext = [];
 let shadowRoot = null;
