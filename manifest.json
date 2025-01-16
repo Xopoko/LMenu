@@ -3,7 +3,7 @@
   "name": "LMenu",
   "version": "1.1",
   "description": "A lot of useful LLM features to work with selected text.",
-  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "permissions": ["activeTab", "scripting", "storage", "tabs", "contextMenus"],
   "background": {
     "service_worker": "dist/background.bundle.js"
   },
@@ -18,7 +18,12 @@
   "options_page": "options.html",
   "web_accessible_resources": [
     {
-      "resources": ["prompts.json", "resultWindow.html", "resultWindow.css", "completionWindow.html"],
+      "resources": [
+        "prompts.json",
+        "resultWindow.html",
+        "resultWindow.css",
+        "completionWindow.html"
+      ],
       "matches": ["<all_urls>"]
     }
   ],

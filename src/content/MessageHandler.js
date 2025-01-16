@@ -1,10 +1,9 @@
-// src/content/messageHandler.js
-
 import {
   appendResultText,
   addAssistantMessage,
   getContext,
 } from "../common/chatUtils";
+import { showResultWindow } from "../common/ui";
 
 class ContentMessageHandler {
   constructor() {
@@ -12,32 +11,38 @@ class ContentMessageHandler {
     this.initListener();
   }
 
-  // Initialize message listener from background
   initListener() {
     chrome.runtime.onMessage.addListener((message) => {
-      if (message.requestId !== this.currentRequestId) return;
-
+      if (message.requestId && message.requestId !== this.currentRequestId) {
+        return;
+      }
       try {
         console.log("Message received:", message);
         switch (message.action) {
           case "streamData":
-            appendResultText(message.content); // Append text to stream
+            appendResultText(message.content);
             break;
           case "streamComplete":
-            // Indicate that the message is complete
-            appendResultText("", true); // Complete the message output
-            console.log("Stream complete");
-
-            // Add assistant text to context
-            const completedMessage = getContext().at(-1)?.content; // Last message
-            if (completedMessage) {
-              addAssistantMessage(completedMessage);
+            appendResultText("", true);
+            {
+              const completedMessage = getContext().at(-1)?.content;
+              if (completedMessage) {
+                addAssistantMessage(completedMessage);
+              }
             }
             break;
           case "streamError":
             console.error("Stream error:", message.error);
             alert(message.error || "Unknown error.");
             break;
+
+          // Open LMenu from dynamic context menu with optional prompt
+          case "openLMenu":
+            window.selectedText = message.text || "";
+            window.selectedPromptFromMenu = message.chosenPrompt || "";
+            showResultWindow();
+            break;
+
           default:
             console.warn("Unknown action:", message.action);
         }
@@ -47,7 +52,6 @@ class ContentMessageHandler {
     });
   }
 
-  // Send message to background
   sendMessage(action, payload) {
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage({ action, payload }, (response) => {
@@ -62,7 +66,6 @@ class ContentMessageHandler {
     });
   }
 
-  // Send request without context
   async sendRequest(text, promptType, promptLanguage) {
     this.currentRequestId = Date.now() + Math.random();
     const payload = {
@@ -71,7 +74,6 @@ class ContentMessageHandler {
       promptLanguage,
       requestId: this.currentRequestId,
     };
-
     try {
       await this.sendMessage("sendToOpenAI", payload);
       console.log("Request sent successfully");
@@ -81,7 +83,6 @@ class ContentMessageHandler {
     }
   }
 
-  // Send request with context
   async sendRequestWithContext(text) {
     this.currentRequestId = Date.now() + Math.random();
     const context = getContext();
@@ -90,7 +91,6 @@ class ContentMessageHandler {
       previousContext: context,
       requestId: this.currentRequestId,
     };
-
     try {
       await this.sendMessage("sendToOpenAI", payload);
       console.log("Request sent successfully");
@@ -100,7 +100,6 @@ class ContentMessageHandler {
     }
   }
 
-  // Cancel current request
   cancelCurrentRequest() {
     if (this.currentRequestId) {
       const payload = { requestId: this.currentRequestId };

@@ -5,23 +5,21 @@
     <meta charset="UTF-8">
     <title>Extension Settings</title>
     <style>
-        /* General styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
+            background-color:
+                color: margin: 0;
             padding: 20px;
         }
 
         h1 {
             text-align: center;
-            color: #444;
+            color:
         }
 
         .section {
-            background-color: #fff;
-            padding: 20px;
+            background-color:
+                padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -29,7 +27,7 @@
 
         .section h2 {
             margin-top: 0;
-            color: #555;
+            color:
         }
 
         label {
@@ -44,8 +42,7 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            border: 1px solid border-radius: 6px;
             font-size: 14px;
         }
 
@@ -57,9 +54,8 @@
         button {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #4285F4;
-            color: #fff;
-            border: none;
+            background-color:
+                color: border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
@@ -67,19 +63,18 @@
         }
 
         button:hover {
-            background-color: #3073E0;
+            background-color:
         }
 
         .button-secondary {
-            background-color: #aaa;
-            margin-left: 10px;
+            background-color:
+                margin-left: 10px;
         }
 
         .button-secondary:hover {
-            background-color: #888;
+            background-color:
         }
 
-        /* Styles for item list */
         .item-list {
             list-style: none;
             padding: 0;
@@ -90,7 +85,7 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid
         }
 
         .item:last-child {
@@ -114,14 +109,12 @@
             font-size: 12px;
         }
 
-        /* Styles for forms */
         .form-container {
             display: none;
             margin-top: 20px;
-            background-color: #fafafa;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            background-color:
+                padding: 15px;
+            border: 1px solid border-radius: 6px;
         }
 
         .form-container.active {
@@ -132,7 +125,6 @@
             margin-top: 10px;
         }
 
-        /* Styles for headers */
         .section-header {
             display: flex;
             align-items: center;
@@ -143,16 +135,14 @@
             margin: 0;
         }
 
-        /* Styles for add buttons */
         .add-button {
-            background-color: #28a745;
+            background-color:
         }
 
         .add-button:hover {
-            background-color: #218838;
+            background-color:
         }
 
-        /* Media queries for responsiveness */
         @media (max-width: 600px) {
             button {
                 width: 100%;
@@ -184,7 +174,6 @@
 
 <body>
     <h1>Extension Settings</h1>
-
     <!-- API Keys Section -->
     <div class="section">
         <div class="section-header">
@@ -194,7 +183,6 @@
         <ul id="apiKeysContainer" class="item-list">
             <!-- API keys list will be here -->
         </ul>
-
         <!-- Form for adding/editing API keys -->
         <div id="apiKeyForm" class="form-container">
             <h3 id="apiKeyFormTitle">Add New API Key</h3>
@@ -208,7 +196,6 @@
             <button id="cancelApiKeyButton" class="button-secondary">Cancel</button>
         </div>
     </div>
-
     <!-- Prompts Section -->
     <div class="section">
         <div class="section-header">
@@ -218,7 +205,6 @@
         <ul id="promptsContainer" class="item-list">
             <!-- Prompts list will be here -->
         </ul>
-
         <!-- Form for adding/editing prompts -->
         <div id="promptForm" class="form-container">
             <h3 id="promptFormTitle">Add New Prompt</h3>
@@ -234,7 +220,6 @@
             <button id="cancelPromptButton" class="button-secondary">Cancel</button>
         </div>
     </div>
-
     <!-- Languages Section -->
     <div class="section">
         <div class="section-header">
@@ -244,7 +229,6 @@
         <ul id="languagesContainer" class="item-list">
             <!-- Languages list will be here -->
         </ul>
-
         <!-- Form for adding language -->
         <div id="languageForm" class="form-container">
             <h3>Add New Language</h3>
@@ -253,6 +237,15 @@
             <button id="saveLanguageButton">Save Language</button>
             <button id="cancelLanguageButton" class="button-secondary">Cancel</button>
         </div>
+    </div>
+
+    <!-- New: General settings -->
+    <div class="section">
+        <h2>General Settings</h2>
+        <label for="showFloatingButton">
+            <input type="checkbox" id="showFloatingButton" />
+            Show floating button
+        </label>
     </div>
 
     <script src="options.js"></script>

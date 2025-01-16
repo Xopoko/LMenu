@@ -1,5 +1,3 @@
-// src/common/ui.js
-
 import {
   loadResultWindowResources,
   makeWindowDraggable,
@@ -12,13 +10,18 @@ import {
   resetContext,
 } from "./chatUtils";
 
-export let shadowRoot = null; // Define shadowRoot here
+export let shadowRoot = null;
 export let initialSelectedText = "";
 export let promptType = "";
 export let promptLanguage = "";
 
 export async function initUI() {
-  createImproveIcon();
+  // "showFloatingButton" disabled by default
+  chrome.storage.sync.get({ showFloatingButton: false }, (result) => {
+    if (result.showFloatingButton) {
+      createImproveIcon();
+    }
+  });
 }
 
 function createImproveIcon() {
@@ -29,7 +32,7 @@ function createImproveIcon() {
   document.body.appendChild(improveIcon);
 
   improveIcon.addEventListener("click", () => {
-    if (window.selectedText.length > 0) {
+    if (window.selectedText && window.selectedText.length > 0) {
       initialSelectedText = window.selectedText;
       showResultWindow();
     }
@@ -37,9 +40,8 @@ function createImproveIcon() {
   });
 }
 
-async function showResultWindow() {
+export async function showResultWindow() {
   const { htmlContent, cssContent } = await loadResultWindowResources();
-
   const container = document.createElement("div");
   container.id = "extensionContainer";
   Object.assign(container.style, {
@@ -52,10 +54,10 @@ async function showResultWindow() {
   });
   document.body.appendChild(container);
 
-  shadowRoot = container.attachShadow({ mode: "open" }); // Assign shadowRoot here
-  setShadowRoot(shadowRoot); // Also set it in chatUtils if needed
-  shadowRoot.innerHTML = htmlContent;
+  shadowRoot = container.attachShadow({ mode: "open" });
+  setShadowRoot(shadowRoot);
 
+  shadowRoot.innerHTML = htmlContent;
   const styleElement = document.createElement("style");
   styleElement.textContent = cssContent;
   shadowRoot.appendChild(styleElement);
@@ -64,7 +66,6 @@ async function showResultWindow() {
 }
 
 function initializeResultWindow() {
-  console.log("Initializing result window...");
   const resultWindow = shadowRoot.getElementById("resultWindow");
   const promptSelector = shadowRoot.getElementById("promptSelector");
   const promptLanguageSelector = shadowRoot.getElementById("promptLanguageSelector");
@@ -93,7 +94,7 @@ function initializeResultWindow() {
   });
 
   settingsButton.addEventListener("click", () => {
-      ContentMessageHandler.openOptionsPage();
+    ContentMessageHandler.openOptionsPage();
   });
 
   copyButton.addEventListener("click", async () => {
@@ -112,7 +113,6 @@ function initializeResultWindow() {
   resendButton.addEventListener("click", () => {
     try {
       ContentMessageHandler.cancelCurrentRequest();
-      console.log("Resending request...");
       resetContext();
       ContentMessageHandler.sendRequest(
         initialSelectedText,
@@ -151,6 +151,13 @@ function initializeResultWindow() {
   makeWindowDraggable(resultWindow);
 
   initializeSelectors(promptSelector, promptLanguageSelector).then(() => {
+    if (window.selectedPromptFromMenu) {
+      promptType = window.selectedPromptFromMenu;
+      promptSelector.value = window.selectedPromptFromMenu;
+      chrome.storage.sync.set({ lastSelectedPrompt: window.selectedPromptFromMenu });
+    }
+
+    initialSelectedText = window.selectedText || "";
     resetContext();
     ContentMessageHandler.sendRequest(
       initialSelectedText,
@@ -161,46 +168,45 @@ function initializeResultWindow() {
 }
 
 async function initializeSelectors(promptSelector, promptLanguageSelector) {
-    try {
-        const [storedData, storedValues] = await Promise.all([
-            new Promise((resolve) => {
-                chrome.storage.sync.get(['prompts', 'languages'], (result) => {
-                    resolve(result);
-                });
-            }),
-            new Promise((resolve) => {
-                chrome.storage.sync.get(
-                    ['lastSelectedPrompt', 'lastSelectedLanguage'],
-                    (result) => {
-                        resolve(result);
-                    }
-                );
-            }),
-        ]);
-
-        const prompts = storedData.prompts || [];
-        const languages = storedData.languages || [];
-
-        if (prompts.length === 0 || languages.length === 0) {
-            // If no data is found, handle the error or set default values
-            console.error('No prompts or languages found in storage.');
-            return;
-        }
-
-        populateSelector(
-            promptSelector,
-            prompts.map((p) => p.name),
-            storedValues.lastSelectedPrompt
+  try {
+    const [storedData, storedValues] = await Promise.all([
+      new Promise((resolve) => {
+        chrome.storage.sync.get(['prompts', 'languages'], (result) => {
+          resolve(result);
+        });
+      }),
+      new Promise((resolve) => {
+        chrome.storage.sync.get(
+          ['lastSelectedPrompt', 'lastSelectedLanguage'],
+          (result) => {
+            resolve(result);
+          }
         );
-        promptType = promptSelector.value;
+      }),
+    ]);
 
-        populateSelector(
-            promptLanguageSelector,
-            languages,
-            storedValues.lastSelectedLanguage
-        );
-        promptLanguage = promptLanguageSelector.value;
-    } catch (error) {
-        console.error('Error initializing selectors:', error);
+    const prompts = storedData.prompts || [];
+    const languages = storedData.languages || [];
+
+    if (prompts.length === 0 || languages.length === 0) {
+      console.error('No prompts or languages found in storage.');
+      return;
     }
+
+    populateSelector(
+      promptSelector,
+      prompts.map((p) => p.name),
+      storedValues.lastSelectedPrompt
+    );
+    promptType = promptSelector.value;
+
+    populateSelector(
+      promptLanguageSelector,
+      languages,
+      storedValues.lastSelectedLanguage
+    );
+    promptLanguage = promptLanguageSelector.value;
+  } catch (error) {
+    console.error('Error initializing selectors:', error);
+  }
 }
