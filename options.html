@@ -4,196 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Extension Settings</title>
+    <link rel="preconnect" href="https:
+    <link rel=" preconnect" href="https:
+    <link href=" https: <link rel="stylesheet" href="options.css">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #333;
+            /* position: relative; */
         }
 
-        h1 {
-            text-align: center;
-            margin-top: 0;
+        .dragging {
+            user-select: none;
         }
 
-        .section {
-            background-color: #fafafa;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .section h2 {
-            margin-top: 0;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .section-header h2 {
-            margin: 0;
-        }
-
-        .add-button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .add-button:hover {
-            background-color: #0056b3;
-        }
-
-        .item-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            position: relative;
-        }
-
-        .item:last-child {
-            border-bottom: none;
-        }
-
-        .drag-handle {
-            cursor: move;
-            margin-right: 10px;
-            font-size: 18px;
-            color: #888;
-            display: flex;
-            align-items: center;
-        }
-
-        .inline-input {
-            margin-right: 10px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .inline-select {
-            margin-right: 10px;
-            padding: 5px;
-            font-size: 14px;
-        }
-
-        .inline-button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 12px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
-        .inline-button:hover {
-            background-color: #0056b3;
-        }
-
-        .button-secondary {
-            background-color: #6c757d;
-            color: #fff;
-            margin-left: 5px;
-        }
-
-        .button-secondary:hover {
-            background-color: #4e555b;
-        }
-
-        .section h3 {
-            margin-top: 0;
-        }
-
-        #showFloatingButton {
-            margin-right: 5px;
-        }
-
-        .reorder-hint {
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .inline-input,
-            .inline-select {
-                margin-bottom: 10px;
-                margin-right: 0;
-            }
-
-            .inline-button {
-                margin: 0 0 10px 0;
-            }
-
-            .drag-handle {
-                margin-bottom: 10px;
-            }
+        .dragging * {
+            user-select: none;
         }
     </style>
 </head>
 
 <body>
-    <h1>Extension Settings</h1>
-    <!-- API Keys Section -->
-    <div class="section">
-        <div class="section-header">
-            <h2>API Keys</h2>
-            <button id="addApiKeyButton" class="add-button">Add API Key</button>
-        </div>
-        <ul id="apiKeysContainer" class="item-list"></ul>
-        <div class="reorder-hint">Drag the handle to reorder items</div>
-    </div>
-    <!-- Prompts Section -->
-    <div class="section">
-        <div class="section-header">
-            <h2>Prompts</h2>
-            <button id="addPromptButton" class="add-button">Add Prompt</button>
-        </div>
-        <ul id="promptsContainer" class="item-list"></ul>
-        <div class="reorder-hint">Drag the handle to reorder items</div>
-    </div>
-    <!-- Languages Section -->
-    <div class="section">
-        <div class="section-header">
-            <h2>Languages</h2>
-            <button id="addLanguageButton" class="add-button">Add Language</button>
-        </div>
-        <ul id="languagesContainer" class="item-list"></ul>
-        <div class="reorder-hint">Drag the handle to reorder items</div>
-    </div>
-    <!-- General settings -->
-    <div class="section">
-        <h2>General Settings</h2>
-        <label for="showFloatingButton">
-            <input type="checkbox" id="showFloatingButton" />
-            Show floating button
-        </label>
-    </div>
-    <script src="options.js"></script>
+    <div id="root"></div>
+    <script src="dist/options.bundle.js"></script>
 </body>
 
 </html>

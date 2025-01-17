@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    padding: 0;
+    /* background: radial-gradient(circle, ... ); */
+    font-family: "Poppins", sans-serif;
+    overflow-y: auto;
+}
+
+.wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.settings-container {
+    /* backdrop-filter: blur(14px); */
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 40px 30px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    /* animation: fadeIn 0.6s ease; */
+}
+
+.section {
+    margin-bottom: 35px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
+}
+
+.section h2 {
+    margin-top: 0;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+}
+
+.section button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-bottom: 10px;
+}
+
+.section button:hover {
+    background-color: #0056b3;
+}
+
+.section label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0 10px 0;
+}
+
+.draggingOver {
+    background-color: #e6f7ff;
+    border: 2px dashed #91d5ff;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.draggableItem {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.draggableItem:hover {
+    background-color: #f2f2f2;
+}
+
+.item-input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.item-input:focus {
+    outline: none;
+    border-color: #007BFF;
+}
+
+textarea {
+    flex: 1;
+    min-height: 60px;
+    resize: vertical;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+select {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    margin-left: auto;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #fff;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.header-icon {
+    font-size: 1.7rem;
+    color: #666;
+}
