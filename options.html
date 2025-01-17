@@ -7,20 +7,18 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f9f9;
             margin: 0;
             padding: 20px;
-            color: #333333;
+            color: #333;
         }
 
         h1 {
             text-align: center;
-            color: #333333;
             margin-top: 0;
         }
 
         .section {
-            background-color: #ffffff;
+            background-color: #fafafa;
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
@@ -29,106 +27,6 @@
 
         .section h2 {
             margin-top: 0;
-            color: #333333;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s ease;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .button-secondary {
-            background-color: #e0e0e0;
-            color: #333333;
-            margin-left: 10px;
-        }
-
-        .button-secondary:hover {
-            background-color: #cccccc;
-        }
-
-        .item-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #cccccc;
-        }
-
-        .item:last-child {
-            border-bottom: none;
-        }
-
-        .item span {
-            flex-grow: 1;
-            font-size: 16px;
-        }
-
-        .item select {
-            margin-left: 10px;
-            padding: 6px 10px;
-            font-size: 12px;
-        }
-
-        .item button {
-            margin-left: 5px;
-            padding: 6px 10px;
-            font-size: 12px;
-        }
-
-        .form-container {
-            display: none;
-            margin-top: 20px;
-            background-color: #fafafa;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        .form-container.active {
-            display: block;
-        }
-
-        .form-container label {
-            margin-top: 10px;
         }
 
         .section-header {
@@ -142,38 +40,117 @@
         }
 
         .add-button {
-            background-color: #2196F3;
-            color: #ffffff;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
         }
 
         .add-button:hover {
-            background-color: #1976d2;
+            background-color: #0056b3;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .drag-handle {
+            cursor: move;
+            margin-right: 10px;
+            font-size: 18px;
+            color: #888;
+            display: flex;
+            align-items: center;
+        }
+
+        .inline-input {
+            margin-right: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .inline-select {
+            margin-right: 10px;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .inline-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .inline-button:hover {
+            background-color: #0056b3;
+        }
+
+        .button-secondary {
+            background-color: #6c757d;
+            color: #fff;
+            margin-left: 5px;
+        }
+
+        .button-secondary:hover {
+            background-color: #4e555b;
+        }
+
+        .section h3 {
+            margin-top: 0;
+        }
+
+        #showFloatingButton {
+            margin-right: 5px;
+        }
+
+        .reorder-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
         }
 
         @media (max-width: 600px) {
-            button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
             .item {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .item button,
-            .item select {
-                margin-left: 0;
-                margin-top: 5px;
+            .inline-input,
+            .inline-select {
+                margin-bottom: 10px;
+                margin-right: 0;
             }
 
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
+            .inline-button {
+                margin: 0 0 10px 0;
             }
 
-            .section-header button {
-                margin-top: 10px;
+            .drag-handle {
+                margin-bottom: 10px;
             }
         }
     </style>
@@ -187,21 +164,8 @@
             <h2>API Keys</h2>
             <button id="addApiKeyButton" class="add-button">Add API Key</button>
         </div>
-        <ul id="apiKeysContainer" class="item-list">
-            <!-- API keys list will be here -->
-        </ul>
-        <!-- Form for adding/editing API keys -->
-        <div id="apiKeyForm" class="form-container">
-            <h3 id="apiKeyFormTitle">Add New API Key</h3>
-            <label for="apiKeyName">API Key Name:</label>
-            <input type="text" id="apiKeyName" placeholder="Enter API key name">
-            <label for="apiKeyValue">API Key:</label>
-            <input type="password" id="apiKeyValue" placeholder="sk-...">
-            <label for="apiKeyModel">Model Name:</label>
-            <input type="text" id="apiKeyModel" placeholder="e.g., gpt-3.5-turbo">
-            <button id="saveApiKeyButton">Save API Key</button>
-            <button id="cancelApiKeyButton" class="button-secondary">Cancel</button>
-        </div>
+        <ul id="apiKeysContainer" class="item-list"></ul>
+        <div class="reorder-hint">Drag the handle to reorder items</div>
     </div>
     <!-- Prompts Section -->
     <div class="section">
@@ -209,23 +173,8 @@
             <h2>Prompts</h2>
             <button id="addPromptButton" class="add-button">Add Prompt</button>
         </div>
-        <ul id="promptsContainer" class="item-list">
-            <!-- Prompts list will be here -->
-        </ul>
-        <!-- Form for adding/editing prompts -->
-        <div id="promptForm" class="form-container">
-            <h3 id="promptFormTitle">Add New Prompt</h3>
-            <label for="promptName">Prompt Name:</label>
-            <input type="text" id="promptName" placeholder="Enter prompt name">
-            <label for="promptContent">Prompt Content:</label>
-            <textarea id="promptContent" placeholder="Enter prompt content"></textarea>
-            <label for="promptApiKeySelector">Select API Key:</label>
-            <select id="promptApiKeySelector">
-                <!-- Options will be populated dynamically -->
-            </select>
-            <button id="savePromptButton">Save Prompt</button>
-            <button id="cancelPromptButton" class="button-secondary">Cancel</button>
-        </div>
+        <ul id="promptsContainer" class="item-list"></ul>
+        <div class="reorder-hint">Drag the handle to reorder items</div>
     </div>
     <!-- Languages Section -->
     <div class="section">
@@ -233,19 +182,10 @@
             <h2>Languages</h2>
             <button id="addLanguageButton" class="add-button">Add Language</button>
         </div>
-        <ul id="languagesContainer" class="item-list">
-            <!-- Languages list will be here -->
-        </ul>
-        <!-- Form for adding language -->
-        <div id="languageForm" class="form-container">
-            <h3>Add New Language</h3>
-            <label for="languageName">Language Name:</label>
-            <input type="text" id="languageName" placeholder="Enter language name">
-            <button id="saveLanguageButton">Save Language</button>
-            <button id="cancelLanguageButton" class="button-secondary">Cancel</button>
-        </div>
+        <ul id="languagesContainer" class="item-list"></ul>
+        <div class="reorder-hint">Drag the handle to reorder items</div>
     </div>
-    <!-- New: General settings -->
+    <!-- General settings -->
     <div class="section">
         <h2>General Settings</h2>
         <label for="showFloatingButton">

@@ -3,33 +3,13 @@ document.addEventListener('DOMContentLoaded', function () {
     initializePromptsAndLanguages();
 
     document.getElementById('addApiKeyButton').addEventListener('click', function () {
-        showApiKeyForm();
+        addApiKeyInline();
     });
-    document.getElementById('saveApiKeyButton').addEventListener('click', function () {
-        saveApiKey();
-    });
-    document.getElementById('cancelApiKeyButton').addEventListener('click', function () {
-        hideApiKeyForm();
-    });
-
     document.getElementById('addPromptButton').addEventListener('click', function () {
-        showPromptForm();
+        addPromptInline();
     });
-    document.getElementById('savePromptButton').addEventListener('click', function () {
-        savePrompt();
-    });
-    document.getElementById('cancelPromptButton').addEventListener('click', function () {
-        hidePromptForm();
-    });
-
     document.getElementById('addLanguageButton').addEventListener('click', function () {
-        showLanguageForm();
-    });
-    document.getElementById('saveLanguageButton').addEventListener('click', function () {
-        saveLanguage();
-    });
-    document.getElementById('cancelLanguageButton').addEventListener('click', function () {
-        hideLanguageForm();
+        addLanguageInline();
     });
 
     chrome.storage.sync.get({ showFloatingButton: false }, function (result) {
@@ -48,98 +28,94 @@ function initializeApiKeys() {
 }
 
 function displayApiKeys(apiKeys) {
-    const apiKeysContainer = document.getElementById('apiKeysContainer');
-    apiKeysContainer.innerHTML = '';
+    const container = document.getElementById('apiKeysContainer');
+    container.innerHTML = '';
     apiKeys.forEach((apiKey, index) => {
-        const apiKeyDiv = document.createElement('div');
-        apiKeyDiv.className = 'item';
+        const item = createApiKeyItem(apiKey, index);
+        container.appendChild(item);
+    });
+    addDragAndDropListeners(container, 'apiKeys');
+}
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = apiKey.name;
+function createApiKeyItem(apiKey, index) {
+    const item = document.createElement('li');
+    item.className = 'item';
+    item.draggable = true;
+    item.dataset.index = index;
 
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.addEventListener('click', function () {
-            showApiKeyForm(index);
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.innerHTML = '&#8942;';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'inline-input';
+    nameInput.value = apiKey.name;
+
+    const keyInput = document.createElement('input');
+    keyInput.type = 'password';
+    keyInput.className = 'inline-input';
+    keyInput.value = apiKey.key;
+
+    const modelInput = document.createElement('input');
+    modelInput.type = 'text';
+    modelInput.className = 'inline-input';
+    modelInput.value = apiKey.model;
+
+    const saveButton = document.createElement('button');
+    saveButton.className = 'inline-button';
+    saveButton.textContent = 'Save';
+    saveButton.addEventListener('click', () => {
+        saveApiKeyInline(index, nameInput.value.trim(), keyInput.value.trim(), modelInput.value.trim());
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'inline-button button-secondary';
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', () => {
+        deleteApiKey(index);
+    });
+
+    item.appendChild(dragHandle);
+    item.appendChild(nameInput);
+    item.appendChild(keyInput);
+    item.appendChild(modelInput);
+    item.appendChild(saveButton);
+    item.appendChild(deleteButton);
+
+    return item;
+}
+
+function addApiKeyInline() {
+    chrome.storage.sync.get(['apiKeys'], function (result) {
+        let apiKeys = result.apiKeys || [];
+        apiKeys.push({ name: `API Key ${Date.now()}`, key: '', model: 'gpt-3.5-turbo' });
+        chrome.storage.sync.set({ apiKeys }, function () {
+            displayApiKeys(apiKeys);
         });
-
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', function () {
-            deleteApiKey(index);
-        });
-
-        apiKeyDiv.appendChild(nameSpan);
-        apiKeyDiv.appendChild(editButton);
-        apiKeyDiv.appendChild(deleteButton);
-        apiKeysContainer.appendChild(apiKeyDiv);
     });
 }
 
-function showApiKeyForm(index) {
-    const apiKeyForm = document.getElementById('apiKeyForm');
-    apiKeyForm.classList.add('active');
-    document.getElementById('apiKeyFormTitle').textContent = index !== undefined ? 'Edit API Key' : 'Add New API Key';
-
-    if (index !== undefined) {
-        chrome.storage.sync.get(['apiKeys'], function (result) {
-            const apiKey = result.apiKeys[index];
-            document.getElementById('apiKeyName').value = apiKey.name;
-            document.getElementById('apiKeyValue').value = apiKey.key;
-            document.getElementById('apiKeyModel').value = apiKey.model;
-            apiKeyForm.dataset.index = index;
-        });
-    } else {
-        document.getElementById('apiKeyName').value = `API Key ${Date.now()}`;
-        document.getElementById('apiKeyValue').value = '';
-        document.getElementById('apiKeyModel').value = 'gpt-3.5-turbo';
-        apiKeyForm.dataset.index = '';
+function saveApiKeyInline(index, name, key, model) {
+    if (!name || !key || !model) {
+        alert('Please fill in all fields.');
+        return;
     }
-}
-
-function hideApiKeyForm() {
-    const apiKeyForm = document.getElementById('apiKeyForm');
-    apiKeyForm.classList.remove('active');
-    apiKeyForm.dataset.index = '';
-}
-
-function saveApiKey() {
-    const name = document.getElementById('apiKeyName').value.trim();
-    const key = document.getElementById('apiKeyValue').value.trim();
-    const model = document.getElementById('apiKeyModel').value.trim();
-
-    if (name && key && model) {
-        chrome.storage.sync.get(['apiKeys', 'prompts'], function (result) {
-            let apiKeys = result.apiKeys || [];
-            let prompts = result.prompts || [];
-            const index = document.getElementById('apiKeyForm').dataset.index;
-
-            if (index !== '') {
-                apiKeys[index] = { name, key, model };
-            } else {
-                apiKeys.push({ name, key, model });
-            }
-
-            chrome.storage.sync.set({ apiKeys }, function () {
-                displayApiKeys(apiKeys);
-                hideApiKeyForm();
-                displayPrompts(prompts);
-            });
+    chrome.storage.sync.get(['apiKeys'], function (result) {
+        let apiKeys = result.apiKeys || [];
+        apiKeys[index] = { name, key, model };
+        chrome.storage.sync.set({ apiKeys }, function () {
+            displayApiKeys(apiKeys);
         });
-    } else {
-        alert('Please fill in all fields for the API key.');
-    }
+    });
 }
 
 function deleteApiKey(index) {
-    chrome.storage.sync.get(['apiKeys', 'prompts'], function (result) {
+    chrome.storage.sync.get(['apiKeys'], function (result) {
         let apiKeys = result.apiKeys || [];
-        let prompts = result.prompts || [];
-
         apiKeys.splice(index, 1);
         chrome.storage.sync.set({ apiKeys }, function () {
             displayApiKeys(apiKeys);
-            displayPrompts(prompts);
         });
     });
 }
@@ -148,14 +124,13 @@ function initializePromptsAndLanguages() {
     chrome.storage.sync.get(['prompts', 'languages'], function (result) {
         let prompts = result.prompts;
         let languages = result.languages;
-
         if (!prompts || !languages) {
             fetch(chrome.runtime.getURL('prompts.json'))
                 .then((response) => response.json())
                 .then((data) => {
                     prompts = data.prompts;
                     languages = data.languages;
-                    chrome.storage.sync.set({ prompts: prompts, languages: languages }, function () {
+                    chrome.storage.sync.set({ prompts, languages }, function () {
                         displayPrompts(prompts);
                         displayLanguages(languages);
                     });
@@ -168,202 +143,255 @@ function initializePromptsAndLanguages() {
 }
 
 function displayPrompts(prompts) {
-    const promptsContainer = document.getElementById('promptsContainer');
-    promptsContainer.innerHTML = '';
+    const container = document.getElementById('promptsContainer');
+    container.innerHTML = '';
     chrome.storage.sync.get(['apiKeys'], function (result) {
         const apiKeys = result.apiKeys || [];
         prompts.forEach((prompt, index) => {
-            const promptDiv = document.createElement('div');
-            promptDiv.className = 'item';
+            const item = createPromptItem(prompt, index, apiKeys);
+            container.appendChild(item);
+        });
+        addDragAndDropListeners(container, 'prompts');
+    });
+}
 
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = prompt.name;
+function createPromptItem(prompt, index, apiKeys) {
+    const item = document.createElement('li');
+    item.className = 'item';
+    item.draggable = true;
+    item.dataset.index = index;
 
-            const apiKeySelector = document.createElement('select');
-            apiKeySelector.style.marginLeft = '10px';
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.innerHTML = '&#8942;';
 
-            apiKeys.forEach((apiKey) => {
-                const option = document.createElement('option');
-                option.value = apiKey.name;
-                option.textContent = apiKey.name;
-                apiKeySelector.appendChild(option);
-            });
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'inline-input';
+    nameInput.value = prompt.name;
 
-            if (prompt.apiKeyName) {
-                apiKeySelector.value = prompt.apiKeyName;
-            } else if (apiKeys.length > 0) {
-                apiKeySelector.value = apiKeys[0].name;
-                prompt.apiKeyName = apiKeys[0].name;
-                savePrompts(prompts);
-            }
+    const contentInput = document.createElement('textarea');
+    contentInput.className = 'inline-input';
+    contentInput.value = prompt.systemContent;
+    contentInput.style.height = '60px';
 
-            apiKeySelector.addEventListener('change', function () {
-                prompt.apiKeyName = apiKeySelector.value;
-                savePrompts(prompts);
-            });
+    const apiKeySelector = document.createElement('select');
+    apiKeySelector.className = 'inline-select';
+    apiKeys.forEach((apiKey) => {
+        const option = document.createElement('option');
+        option.value = apiKey.name;
+        option.textContent = apiKey.name;
+        apiKeySelector.appendChild(option);
+    });
+    apiKeySelector.value = prompt.apiKeyName || apiKeys[0]?.name || '';
 
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.addEventListener('click', function () {
-                showPromptForm(index);
-            });
+    const saveButton = document.createElement('button');
+    saveButton.className = 'inline-button';
+    saveButton.textContent = 'Save';
+    saveButton.addEventListener('click', () => {
+        savePromptInline(index, nameInput.value.trim(), contentInput.value.trim(), apiKeySelector.value);
+    });
 
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.addEventListener('click', function () {
-                deletePrompt(index);
-            });
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'inline-button button-secondary';
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', () => {
+        deletePrompt(index);
+    });
 
-            promptDiv.appendChild(nameSpan);
-            promptDiv.appendChild(apiKeySelector);
-            promptDiv.appendChild(editButton);
-            promptDiv.appendChild(deleteButton);
-            promptsContainer.appendChild(promptDiv);
+    item.appendChild(dragHandle);
+    item.appendChild(nameInput);
+    item.appendChild(contentInput);
+    item.appendChild(apiKeySelector);
+    item.appendChild(saveButton);
+    item.appendChild(deleteButton);
+
+    return item;
+}
+
+function addPromptInline() {
+    chrome.storage.sync.get(['prompts', 'apiKeys'], function (result) {
+        let prompts = result.prompts || [];
+        let apiKeys = result.apiKeys || [];
+        const defaultKeyName = apiKeys[0]?.name || '';
+        prompts.push({ name: 'New Prompt', systemContent: '', apiKeyName: defaultKeyName });
+        chrome.storage.sync.set({ prompts }, function () {
+            displayPrompts(prompts);
         });
     });
 }
 
-function savePrompts(prompts) {
-    chrome.storage.sync.set({ prompts }, function () {
-        console.log('Prompts updated.');
-    });
-}
-
-function showPromptForm(index) {
-    const promptForm = document.getElementById('promptForm');
-    promptForm.classList.add('active');
-    document.getElementById('promptFormTitle').textContent = index !== undefined ? 'Edit Prompt' : 'Add New Prompt';
-
-    chrome.storage.sync.get(['apiKeys'], function (result) {
-        const apiKeys = result.apiKeys || [];
-        const apiKeySelector = document.getElementById('promptApiKeySelector');
-        apiKeySelector.innerHTML = '';
-
-        apiKeys.forEach((apiKey) => {
-            const option = document.createElement('option');
-            option.value = apiKey.name;
-            option.textContent = apiKey.name;
-            apiKeySelector.appendChild(option);
-        });
-
-        if (index !== undefined) {
-            chrome.storage.sync.get(['prompts'], function (result) {
-                const prompt = result.prompts[index];
-                document.getElementById('promptName').value = prompt.name;
-                document.getElementById('promptContent').value = prompt.systemContent;
-                apiKeySelector.value = prompt.apiKeyName || apiKeys[0]?.name;
-                promptForm.dataset.index = index;
-            });
-        } else {
-            document.getElementById('promptName').value = '';
-            document.getElementById('promptContent').value = '';
-            apiKeySelector.value = apiKeys[0]?.name;
-            promptForm.dataset.index = '';
-        }
-    });
-}
-
-function hidePromptForm() {
-    const promptForm = document.getElementById('promptForm');
-    promptForm.classList.remove('active');
-    promptForm.dataset.index = '';
-}
-
-function savePrompt() {
-    const name = document.getElementById('promptName').value.trim();
-    const content = document.getElementById('promptContent').value.trim();
-    const apiKeyName = document.getElementById('promptApiKeySelector').value;
-
-    if (name && content) {
-        chrome.storage.sync.get(['prompts'], function (result) {
-            let prompts = result.prompts || [];
-            const index = document.getElementById('promptForm').dataset.index;
-
-            if (index !== '') {
-                prompts[index] = { name: name, systemContent: content, apiKeyName };
-            } else {
-                prompts.push({ name: name, systemContent: content, apiKeyName });
-            }
-
-            chrome.storage.sync.set({ prompts: prompts }, function () {
-                displayPrompts(prompts);
-                hidePromptForm();
-            });
-        });
-    } else {
-        alert('Please enter both name and content for the prompt.');
+function savePromptInline(index, name, content, apiKeyName) {
+    if (!name || !content) {
+        alert('Please fill in name and content.');
+        return;
     }
+    chrome.storage.sync.get(['prompts'], function (result) {
+        let prompts = result.prompts || [];
+        prompts[index] = { name, systemContent: content, apiKeyName };
+        chrome.storage.sync.set({ prompts }, function () {
+            displayPrompts(prompts);
+        });
+    });
 }
 
 function deletePrompt(index) {
     chrome.storage.sync.get(['prompts'], function (result) {
         let prompts = result.prompts || [];
         prompts.splice(index, 1);
-        chrome.storage.sync.set({ prompts: prompts }, function () {
+        chrome.storage.sync.set({ prompts }, function () {
             displayPrompts(prompts);
         });
     });
 }
 
 function displayLanguages(languages) {
-    const languagesContainer = document.getElementById('languagesContainer');
-    languagesContainer.innerHTML = '';
+    const container = document.getElementById('languagesContainer');
+    container.innerHTML = '';
     languages.forEach((language, index) => {
-        const languageDiv = document.createElement('div');
-        languageDiv.className = 'item';
+        const item = createLanguageItem(language, index);
+        container.appendChild(item);
+    });
+    addDragAndDropListeners(container, 'languages');
+}
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = language;
+function createLanguageItem(language, index) {
+    const item = document.createElement('li');
+    item.className = 'item';
+    item.draggable = true;
+    item.dataset.index = index;
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', function () {
-            deleteLanguage(index);
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.innerHTML = '&#8942;';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'inline-input';
+    nameInput.value = language;
+
+    const saveButton = document.createElement('button');
+    saveButton.className = 'inline-button';
+    saveButton.textContent = 'Save';
+    saveButton.addEventListener('click', () => {
+        saveLanguageInline(index, nameInput.value.trim());
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'inline-button button-secondary';
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', () => {
+        deleteLanguage(index);
+    });
+
+    item.appendChild(dragHandle);
+    item.appendChild(nameInput);
+    item.appendChild(saveButton);
+    item.appendChild(deleteButton);
+
+    return item;
+}
+
+function addLanguageInline() {
+    chrome.storage.sync.get(['languages'], function (result) {
+        let languages = result.languages || [];
+        languages.push('New Language');
+        chrome.storage.sync.set({ languages }, function () {
+            displayLanguages(languages);
         });
-
-        languageDiv.appendChild(nameSpan);
-        languageDiv.appendChild(deleteButton);
-        languagesContainer.appendChild(languageDiv);
     });
 }
 
-function showLanguageForm() {
-    const languageForm = document.getElementById('languageForm');
-    languageForm.classList.add('active');
-    document.getElementById('languageName').value = '';
-}
-
-function hideLanguageForm() {
-    const languageForm = document.getElementById('languageForm');
-    languageForm.classList.remove('active');
-}
-
-function saveLanguage() {
-    const language = document.getElementById('languageName').value.trim();
-    if (language) {
-        chrome.storage.sync.get(['languages'], function (result) {
-            let languages = result.languages || [];
-            if (!languages.includes(language)) {
-                languages.push(language);
-                chrome.storage.sync.set({ languages: languages }, function () {
-                    displayLanguages(languages);
-                    hideLanguageForm();
-                });
-            } else {
-                alert('Language already exists.');
-            }
-        });
-    } else {
-        alert('Please enter a language name.');
+function saveLanguageInline(index, language) {
+    if (!language) {
+        alert('Please enter a language.');
+        return;
     }
+    chrome.storage.sync.get(['languages'], function (result) {
+        let languages = result.languages || [];
+        languages[index] = language;
+        chrome.storage.sync.set({ languages }, function () {
+            displayLanguages(languages);
+        });
+    });
 }
 
 function deleteLanguage(index) {
     chrome.storage.sync.get(['languages'], function (result) {
         let languages = result.languages || [];
         languages.splice(index, 1);
-        chrome.storage.sync.set({ languages: languages }, function () {
+        chrome.storage.sync.set({ languages }, function () {
             displayLanguages(languages);
         });
+    });
+}
+
+function addDragAndDropListeners(listElement, storageKey) {
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDragEnter() {
+        this.classList.add('over');
+    }
+
+    function handleDragLeave() {
+        this.classList.remove('over');
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+        if (dragSrcEl !== this) {
+            let draggedIndex = parseInt(dragSrcEl.dataset.index, 10);
+            let droppedIndex = parseInt(this.dataset.index, 10);
+
+            chrome.storage.sync.get([storageKey], function (result) {
+                let items = result[storageKey] || [];
+                const temp = items[draggedIndex];
+                items[draggedIndex] = items[droppedIndex];
+                items[droppedIndex] = temp;
+                chrome.storage.sync.set({ [storageKey]: items }, function () {
+                    if (storageKey === 'apiKeys') {
+                        displayApiKeys(items);
+                    } else if (storageKey === 'prompts') {
+                        displayPrompts(items);
+                    } else if (storageKey === 'languages') {
+                        displayLanguages(items);
+                    }
+                });
+            });
+        }
+        return false;
+    }
+
+    function handleDragEnd() {
+        const items = listElement.querySelectorAll('.item');
+        items.forEach(function (item) {
+            item.classList.remove('over');
+        });
+    }
+
+    const items = listElement.querySelectorAll('.item');
+    items.forEach(function (item) {
+        item.addEventListener('dragstart', handleDragStart, false);
+        item.addEventListener('dragenter', handleDragEnter, false);
+        item.addEventListener('dragover', handleDragOver, false);
+        item.addEventListener('dragleave', handleDragLeave, false);
+        item.addEventListener('drop', handleDrop, false);
+        item.addEventListener('dragend', handleDragEnd, false);
     });
 }
