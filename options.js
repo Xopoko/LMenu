@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('cancelApiKeyButton').addEventListener('click', function () {
         hideApiKeyForm();
     });
+
     document.getElementById('addPromptButton').addEventListener('click', function () {
         showPromptForm();
     });
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('cancelPromptButton').addEventListener('click', function () {
         hidePromptForm();
     });
+
     document.getElementById('addLanguageButton').addEventListener('click', function () {
         showLanguageForm();
     });
@@ -30,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
         hideLanguageForm();
     });
 
-    // "Show floating button" disabled by default
     chrome.storage.sync.get({ showFloatingButton: false }, function (result) {
         document.getElementById('showFloatingButton').checked = result.showFloatingButton;
     });
@@ -52,18 +53,22 @@ function displayApiKeys(apiKeys) {
     apiKeys.forEach((apiKey, index) => {
         const apiKeyDiv = document.createElement('div');
         apiKeyDiv.className = 'item';
+
         const nameSpan = document.createElement('span');
         nameSpan.textContent = apiKey.name;
+
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.addEventListener('click', function () {
             showApiKeyForm(index);
         });
+
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', function () {
             deleteApiKey(index);
         });
+
         apiKeyDiv.appendChild(nameSpan);
         apiKeyDiv.appendChild(editButton);
         apiKeyDiv.appendChild(deleteButton);
@@ -73,7 +78,9 @@ function displayApiKeys(apiKeys) {
 
 function showApiKeyForm(index) {
     const apiKeyForm = document.getElementById('apiKeyForm');
-    apiKeyForm.style.display = 'block';
+    apiKeyForm.classList.add('active');
+    document.getElementById('apiKeyFormTitle').textContent = index !== undefined ? 'Edit API Key' : 'Add New API Key';
+
     if (index !== undefined) {
         chrome.storage.sync.get(['apiKeys'], function (result) {
             const apiKey = result.apiKeys[index];
@@ -92,7 +99,7 @@ function showApiKeyForm(index) {
 
 function hideApiKeyForm() {
     const apiKeyForm = document.getElementById('apiKeyForm');
-    apiKeyForm.style.display = 'none';
+    apiKeyForm.classList.remove('active');
     apiKeyForm.dataset.index = '';
 }
 
@@ -100,16 +107,19 @@ function saveApiKey() {
     const name = document.getElementById('apiKeyName').value.trim();
     const key = document.getElementById('apiKeyValue').value.trim();
     const model = document.getElementById('apiKeyModel').value.trim();
+
     if (name && key && model) {
         chrome.storage.sync.get(['apiKeys', 'prompts'], function (result) {
             let apiKeys = result.apiKeys || [];
             let prompts = result.prompts || [];
             const index = document.getElementById('apiKeyForm').dataset.index;
+
             if (index !== '') {
                 apiKeys[index] = { name, key, model };
             } else {
                 apiKeys.push({ name, key, model });
             }
+
             chrome.storage.sync.set({ apiKeys }, function () {
                 displayApiKeys(apiKeys);
                 hideApiKeyForm();
@@ -125,6 +135,7 @@ function deleteApiKey(index) {
     chrome.storage.sync.get(['apiKeys', 'prompts'], function (result) {
         let apiKeys = result.apiKeys || [];
         let prompts = result.prompts || [];
+
         apiKeys.splice(index, 1);
         chrome.storage.sync.set({ apiKeys }, function () {
             displayApiKeys(apiKeys);
@@ -137,6 +148,7 @@ function initializePromptsAndLanguages() {
     chrome.storage.sync.get(['prompts', 'languages'], function (result) {
         let prompts = result.prompts;
         let languages = result.languages;
+
         if (!prompts || !languages) {
             fetch(chrome.runtime.getURL('prompts.json'))
                 .then((response) => response.json())
@@ -163,16 +175,20 @@ function displayPrompts(prompts) {
         prompts.forEach((prompt, index) => {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'item';
+
             const nameSpan = document.createElement('span');
             nameSpan.textContent = prompt.name;
+
             const apiKeySelector = document.createElement('select');
             apiKeySelector.style.marginLeft = '10px';
+
             apiKeys.forEach((apiKey) => {
                 const option = document.createElement('option');
                 option.value = apiKey.name;
                 option.textContent = apiKey.name;
                 apiKeySelector.appendChild(option);
             });
+
             if (prompt.apiKeyName) {
                 apiKeySelector.value = prompt.apiKeyName;
             } else if (apiKeys.length > 0) {
@@ -180,20 +196,24 @@ function displayPrompts(prompts) {
                 prompt.apiKeyName = apiKeys[0].name;
                 savePrompts(prompts);
             }
+
             apiKeySelector.addEventListener('change', function () {
                 prompt.apiKeyName = apiKeySelector.value;
                 savePrompts(prompts);
             });
+
             const editButton = document.createElement('button');
             editButton.textContent = 'Edit';
             editButton.addEventListener('click', function () {
                 showPromptForm(index);
             });
+
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.addEventListener('click', function () {
                 deletePrompt(index);
             });
+
             promptDiv.appendChild(nameSpan);
             promptDiv.appendChild(apiKeySelector);
             promptDiv.appendChild(editButton);
@@ -211,17 +231,21 @@ function savePrompts(prompts) {
 
 function showPromptForm(index) {
     const promptForm = document.getElementById('promptForm');
-    promptForm.style.display = 'block';
+    promptForm.classList.add('active');
+    document.getElementById('promptFormTitle').textContent = index !== undefined ? 'Edit Prompt' : 'Add New Prompt';
+
     chrome.storage.sync.get(['apiKeys'], function (result) {
         const apiKeys = result.apiKeys || [];
         const apiKeySelector = document.getElementById('promptApiKeySelector');
         apiKeySelector.innerHTML = '';
+
         apiKeys.forEach((apiKey) => {
             const option = document.createElement('option');
             option.value = apiKey.name;
             option.textContent = apiKey.name;
             apiKeySelector.appendChild(option);
         });
+
         if (index !== undefined) {
             chrome.storage.sync.get(['prompts'], function (result) {
                 const prompt = result.prompts[index];
@@ -241,7 +265,7 @@ function showPromptForm(index) {
 
 function hidePromptForm() {
     const promptForm = document.getElementById('promptForm');
-    promptForm.style.display = 'none';
+    promptForm.classList.remove('active');
     promptForm.dataset.index = '';
 }
 
@@ -249,15 +273,18 @@ function savePrompt() {
     const name = document.getElementById('promptName').value.trim();
     const content = document.getElementById('promptContent').value.trim();
     const apiKeyName = document.getElementById('promptApiKeySelector').value;
+
     if (name && content) {
         chrome.storage.sync.get(['prompts'], function (result) {
             let prompts = result.prompts || [];
             const index = document.getElementById('promptForm').dataset.index;
+
             if (index !== '') {
                 prompts[index] = { name: name, systemContent: content, apiKeyName };
             } else {
                 prompts.push({ name: name, systemContent: content, apiKeyName });
             }
+
             chrome.storage.sync.set({ prompts: prompts }, function () {
                 displayPrompts(prompts);
                 hidePromptForm();
@@ -284,13 +311,16 @@ function displayLanguages(languages) {
     languages.forEach((language, index) => {
         const languageDiv = document.createElement('div');
         languageDiv.className = 'item';
+
         const nameSpan = document.createElement('span');
         nameSpan.textContent = language;
+
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', function () {
             deleteLanguage(index);
         });
+
         languageDiv.appendChild(nameSpan);
         languageDiv.appendChild(deleteButton);
         languagesContainer.appendChild(languageDiv);
@@ -299,13 +329,13 @@ function displayLanguages(languages) {
 
 function showLanguageForm() {
     const languageForm = document.getElementById('languageForm');
-    languageForm.style.display = 'block';
+    languageForm.classList.add('active');
     document.getElementById('languageName').value = '';
 }
 
 function hideLanguageForm() {
     const languageForm = document.getElementById('languageForm');
-    languageForm.style.display = 'none';
+    languageForm.classList.remove('active');
 }
 
 function saveLanguage() {

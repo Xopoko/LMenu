@@ -7,19 +7,21 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color:
-                color: margin: 0;
+            background-color: #f9f9f9;
+            margin: 0;
             padding: 20px;
+            color: #333333;
         }
 
         h1 {
             text-align: center;
-            color:
+            color: #333333;
+            margin-top: 0;
         }
 
         .section {
-            background-color:
-                padding: 20px;
+            background-color: #ffffff;
+            padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -27,7 +29,7 @@
 
         .section h2 {
             margin-top: 0;
-            color:
+            color: #333333;
         }
 
         label {
@@ -42,7 +44,8 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
-            border: 1px solid border-radius: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
             font-size: 14px;
         }
 
@@ -54,8 +57,9 @@
         button {
             display: inline-block;
             padding: 10px 20px;
-            background-color:
-                color: border: none;
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
@@ -63,16 +67,17 @@
         }
 
         button:hover {
-            background-color:
+            background-color: #45a049;
         }
 
         .button-secondary {
-            background-color:
-                margin-left: 10px;
+            background-color: #e0e0e0;
+            color: #333333;
+            margin-left: 10px;
         }
 
         .button-secondary:hover {
-            background-color:
+            background-color: #cccccc;
         }
 
         .item-list {
@@ -85,7 +90,7 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            border-bottom: 1px solid
+            border-bottom: 1px solid #cccccc;
         }
 
         .item:last-child {
@@ -112,9 +117,10 @@
         .form-container {
             display: none;
             margin-top: 20px;
-            background-color:
-                padding: 15px;
-            border: 1px solid border-radius: 6px;
+            background-color: #fafafa;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
         }
 
         .form-container.active {
@@ -136,11 +142,12 @@
         }
 
         .add-button {
-            background-color:
+            background-color: #2196F3;
+            color: #ffffff;
         }
 
         .add-button:hover {
-            background-color:
+            background-color: #1976d2;
         }
 
         @media (max-width: 600px) {
@@ -238,7 +245,6 @@
             <button id="cancelLanguageButton" class="button-secondary">Cancel</button>
         </div>
     </div>
-
     <!-- New: General settings -->
     <div class="section">
         <h2>General Settings</h2>
@@ -247,7 +253,6 @@
             Show floating button
         </label>
     </div>
-
     <script src="options.js"></script>
 </body>
 
