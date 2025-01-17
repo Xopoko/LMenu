@@ -8,6 +8,7 @@ import { showResultWindow } from "../common/ui";
 class ContentMessageHandler {
   constructor() {
     this.currentRequestId = null;
+    this.userInitiatedCancel = false;
     this.initListener();
   }
 
@@ -33,16 +34,16 @@ class ContentMessageHandler {
             break;
           case "streamError":
             console.error("Stream error:", message.error);
-            alert(message.error || "Unknown error.");
+            if (!(message.error === "Request was canceled." && this.userInitiatedCancel)) {
+              alert(message.error || "Unknown error.");
+            }
+            this.userInitiatedCancel = false;
             break;
-
-          // Open LMenu from dynamic context menu with optional prompt
           case "openLMenu":
             window.selectedText = message.text || "";
             window.selectedPromptFromMenu = message.chosenPrompt || "";
             showResultWindow();
             break;
-
           default:
             console.warn("Unknown action:", message.action);
         }
@@ -50,6 +51,10 @@ class ContentMessageHandler {
         console.error("Error handling message:", error);
       }
     });
+  }
+
+  setUserInitiatedCancel(flag) {
+    this.userInitiatedCancel = flag;
   }
 
   sendMessage(action, payload) {

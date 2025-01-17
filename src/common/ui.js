@@ -16,7 +16,6 @@ export let promptType = "";
 export let promptLanguage = "";
 
 export async function initUI() {
-  // "showFloatingButton" disabled by default
   chrome.storage.sync.get({ showFloatingButton: false }, (result) => {
     if (result.showFloatingButton) {
       createImproveIcon();
@@ -85,7 +84,21 @@ function initializeResultWindow() {
     }
   });
 
+  // Send message on Enter
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const userMessage = chatInput.value.trim();
+      if (userMessage) {
+        addUserMessage(userMessage);
+        ContentMessageHandler.sendRequestWithContext(userMessage);
+        chatInput.value = "";
+      }
+    }
+  });
+
   closeButton.addEventListener("click", () => {
+    ContentMessageHandler.setUserInitiatedCancel(true);
     const extensionContainer = document.getElementById("extensionContainer");
     if (extensionContainer) {
       extensionContainer.remove();
@@ -149,14 +162,12 @@ function initializeResultWindow() {
   });
 
   makeWindowDraggable(resultWindow);
-
   initializeSelectors(promptSelector, promptLanguageSelector).then(() => {
     if (window.selectedPromptFromMenu) {
       promptType = window.selectedPromptFromMenu;
       promptSelector.value = window.selectedPromptFromMenu;
       chrome.storage.sync.set({ lastSelectedPrompt: window.selectedPromptFromMenu });
     }
-
     initialSelectedText = window.selectedText || "";
     resetContext();
     ContentMessageHandler.sendRequest(
