@@ -4,7 +4,7 @@
   "description": "Improves selected text using OpenAI",
   "main": "background.js",
   "scripts": {
-    "build": "webpack"
+    "build": "node build.js"
   },
   "author": "",
   "license": "ISC",
