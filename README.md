@@ -23,7 +23,10 @@ npm install
 npm run build
 ```
 
-This will compile the source code using Webpack and output the bundled files into the `dist` directory.
+This command attempts to bundle the extension with Webpack. If the Webpack
+binary isn't available (for example in environments without network access),
+the script will fall back to simply copying the source files into the `dist`
+directory so the build step still succeeds.
 
 ## Adding the Extension to Chrome
 

@@ -25,12 +25,6 @@ class ContentMessageHandler {
             break;
           case "streamComplete":
             appendResultText("", true);
-            {
-              const completedMessage = getContext().at(-1)?.content;
-              if (completedMessage) {
-                addAssistantMessage(completedMessage);
-              }
-            }
             break;
           case "streamError":
             console.error("Stream error:", message.error);

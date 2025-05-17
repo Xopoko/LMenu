@@ -3,7 +3,7 @@ import {
   makeWindowDraggable,
   populateSelector,
 } from "./utils";
-import ContentMessageHandler from "../content/messageHandler";
+import ContentMessageHandler from "../content/MessageHandler";
 import {
   addUserMessage,
   setShadowRoot,
